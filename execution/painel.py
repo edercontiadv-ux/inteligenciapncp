@@ -58,6 +58,53 @@ if "download_pdf" in st.query_params:
     except Exception as e:
         st.error("Erro ao baixar o arquivo do portal PNCP. O servidor deles pode estar instável no momento.")
 else:
+    # ─── AUTENTICAÇÃO FIREBASE ───
+    FIREBASE_API_KEY = "AIzaSyBo_a1Gn2juQqR8rsCOEWcm7lszhpzkdo8"
+    
+    if 'usuario_logado' not in st.session_state:
+        st.session_state['usuario_logado'] = False
+
+    if not st.session_state['usuario_logado']:
+        st.markdown("""
+        <style>
+            #MainMenu, footer, header {visibility: hidden;}
+            .stApp { font-family: 'Inter', sans-serif; background-color: #f8f9fb; }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1.2, 1])
+        with col2:
+            st.markdown("<h2 style='text-align: center; color: #0f172a; margin-bottom: 20px;'>Acesso Restrito</h2>", unsafe_allow_html=True)
+            with st.container(border=True):
+                with st.form("login_form"):
+                    email = st.text_input("E-mail", placeholder="seu@email.com")
+                    senha = st.text_input("Senha", type="password", placeholder="••••••••")
+                    submit = st.form_submit_button("Entrar", type="primary", use_container_width=True)
+                    
+                    if submit:
+                        if not email or not senha:
+                            st.warning("Preencha e-mail e senha.")
+                        else:
+                            with st.spinner("Autenticando..."):
+                                try:
+                                    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+                                    r = requests.post(url, json={"email": email, "password": senha, "returnSecureToken": True})
+                                    if r.status_code == 200:
+                                        st.session_state['usuario_logado'] = True
+                                        st.rerun()
+                                    else:
+                                        st.error("E-mail ou senha incorretos.")
+                                except Exception as e:
+                                    st.error("Erro ao conectar no servidor de autenticação.")
+        st.stop()
+
+    # Se chegou aqui, o usuário está logado.
+    st.sidebar.markdown("### 👤 Minha Conta")
+    if st.sidebar.button("Sair (Logout)", use_container_width=True):
+        st.session_state['usuario_logado'] = False
+        st.rerun()
+
     # ─── CSS ───
     st.markdown("""
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
