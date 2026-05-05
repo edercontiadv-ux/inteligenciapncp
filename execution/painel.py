@@ -70,82 +70,125 @@ else:
             #MainMenu, footer, header {visibility: hidden;}
             .stApp { 
                 font-family: 'Inter', sans-serif; 
-                background-color: #f8f9fb; 
-                background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-                background-size: 30px 30px;
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            /* Esconder a barra lateral na tela de login */
+            [data-testid="stSidebar"] {
+                display: none;
+            }
+            .main-container {
+                display: flex;
+                width: 900px;
+                background: white;
+                border-radius: 24px;
+                overflow: hidden;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             }
             div[data-testid="stForm"] {
-                background-color: #ffffff;
-                border: 1px solid #e2e8f0;
-                border-radius: 16px;
-                padding: 32px 24px;
-                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+                border: none !important;
+                padding: 0 !important;
+                background: transparent !important;
             }
-            .login-header {
-                text-align: center;
-                margin-bottom: 1.5rem;
+            .login-section {
+                padding: 48px;
+                width: 100%;
             }
             .login-header h2 {
                 color: #0f172a;
-                font-size: 2.2rem;
-                font-weight: 600;
-                margin-bottom: 0.2rem;
-                letter-spacing: -0.02em;
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+                letter-spacing: -0.03em;
             }
             .login-header p {
                 color: #64748b;
-                font-size: 0.8rem;
-                margin: 0;
+                font-size: 0.9rem;
+                margin-bottom: 2rem;
             }
-            div[data-testid="stTextInput"] label p {
-                font-weight: 500;
-                color: #334155;
+            .stButton > button {
+                background-color: #3b82f6 !important;
+                color: white !important;
+                border-radius: 12px !important;
+                padding: 12px 24px !important;
+                font-weight: 600 !important;
+                height: 3.5rem !important;
+                border: none !important;
+                transition: all 0.2s ease !important;
             }
-            div[data-testid="stFormSubmitButton"] button {
-                border-radius: 8px;
-                font-weight: 600;
-                padding: 6px 0;
-                margin-top: 10px;
+            .stButton > button:hover {
+                background-color: #2563eb !important;
+                transform: translateY(-2px);
+                box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+            }
+            div[data-testid="stTextInput"] input {
+                border-radius: 12px !important;
+                border: 1px solid #e2e8f0 !important;
+                padding: 12px 16px !important;
+                height: 3.5rem !important;
+            }
+            div[data-testid="stTextInput"] label {
+                font-weight: 600 !important;
+                color: #475569 !important;
+                font-size: 0.85rem !important;
+                margin-bottom: 8px !important;
+            }
+            .img-container img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 16px;
             }
         </style>
         """, unsafe_allow_html=True)
         
-        st.markdown("<br>", unsafe_allow_html=True)
-        col_img, col_login = st.columns([1.1, 1], gap="large")
+        # Centralização manual via colunas para o Streamlit
+        _, center_col, _ = st.columns([0.2, 1, 0.2])
         
-        with col_img:
-            img_path = os.path.join(os.path.dirname(__file__), "login_image.png")
-            if os.path.exists(img_path):
-                st.image(img_path, use_container_width=True)
+        with center_col:
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            # Criando um container branco estilo "Card"
+            with st.container(border=True):
+                col_img, col_login = st.columns([1.2, 1], gap="large")
                 
-        with col_login:
-            st.markdown("""
-            <div class="login-header">
-                <h2>🏛️ Inteligência PNCP</h2>
-                <p>Faça login para acessar o painel de pesquisa</p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            with st.form("login_form"):
-                email = st.text_input("E-mail corporativo", placeholder="seu@email.com")
-                senha = st.text_input("Senha", type="password", placeholder="••••••••")
-                submit = st.form_submit_button("Entrar no sistema", type="primary", use_container_width=True)
+                with col_img:
+                    img_path = os.path.join(os.path.dirname(__file__), "login_image.png")
+                    if os.path.exists(img_path):
+                        st.markdown('<div class="img-container">', unsafe_allow_html=True)
+                        st.image(img_path, use_container_width=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
                 
-                if submit:
-                    if not email or not senha:
-                        st.warning("Preencha e-mail e senha.")
-                    else:
-                        with st.spinner("Verificando credenciais..."):
-                            try:
-                                url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
-                                r = requests.post(url, json={"email": email, "password": senha, "returnSecureToken": True})
-                                if r.status_code == 200:
-                                    st.session_state['usuario_logado'] = True
-                                    st.rerun()
-                                else:
-                                    st.error("E-mail ou senha incorretos. Verifique suas credenciais.")
-                            except Exception as e:
-                                st.error("Erro ao conectar no servidor de autenticação.")
+                with col_login:
+                    st.markdown("""
+                    <div class="login-header">
+                        <h2>🏛️ Inteligência PNCP</h2>
+                        <p>Bem-vindo ao futuro da pesquisa de preços governamentais.</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    with st.form("login_form"):
+                        email = st.text_input("E-mail corporativo", placeholder="exemplo@ederconti.adv.br")
+                        senha = st.text_input("Senha de acesso", type="password", placeholder="Sua senha secreta")
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        submit = st.form_submit_button("Acessar Painel", type="primary", use_container_width=True)
+                        
+                        if submit:
+                            if not email or not senha:
+                                st.warning("Por favor, preencha todos os campos.")
+                            else:
+                                with st.spinner("Verificando credenciais..."):
+                                    try:
+                                        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+                                        r = requests.post(url, json={"email": email, "password": senha, "returnSecureToken": True})
+                                        if r.status_code == 200:
+                                            st.session_state['usuario_logado'] = True
+                                            st.rerun()
+                                        else:
+                                            st.error("Credenciais inválidas. Tente novamente.")
+                                    except Exception as e:
+                                        st.error("Falha na conexão com o servidor.")
         st.stop()
 
     # Se chegou aqui, o usuário está logado.
