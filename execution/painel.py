@@ -110,9 +110,15 @@ else:
         </style>
         """, unsafe_allow_html=True)
         
-        st.markdown("<br><br><br><br>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 1.2, 1])
-        with col2:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        col_img, col_login = st.columns([1.1, 1], gap="large")
+        
+        with col_img:
+            img_path = os.path.join(os.path.dirname(__file__), "login_image.png")
+            if os.path.exists(img_path):
+                st.image(img_path, use_container_width=True)
+                
+        with col_login:
             st.markdown("""
             <div class="login-header">
                 <h2>🏛️ Inteligência PNCP</h2>
