@@ -79,14 +79,13 @@ else:
             }
             [data-testid="stSidebar"] { display: none; }
             
-            /* Ajuste para o layout centralizado do Streamlit */
             .main .block-container {
-                padding-top: 0 !important;
-                padding-bottom: 0 !important;
+                padding: 0 !important;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 height: 100vh;
+                max-width: 100% !important;
             }
             
             /* Container principal estilo Card */
@@ -96,16 +95,19 @@ else:
                 box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
                 padding: 0 !important;
                 overflow: hidden;
+                width: 900px;
                 max-height: 90vh;
             }
             
             div[data-testid="stForm"] {
                 border: none !important;
                 padding: 0 !important;
+                width: 100%;
             }
             
             .login-header {
-                margin-bottom: 1.5rem;
+                text-align: center;
+                margin-bottom: 1.2rem;
             }
             .login-header h1 {
                 font-size: 1.6rem;
@@ -124,6 +126,7 @@ else:
                 color: #374151;
                 font-size: 0.85rem;
                 margin-bottom: 4px;
+                text-align: left;
             }
             div[data-testid="stTextInput"] input {
                 border-radius: 10px !important;
@@ -132,8 +135,8 @@ else:
                 background-color: #ffffff !important;
             }
             
-            /* Botão Entrar */
-            .stButton > button {
+            /* Botão Entrar - Forçando Azul */
+            div[data-testid="stFormSubmitButton"] button {
                 background-color: #2563eb !important;
                 color: white !important;
                 border-radius: 10px !important;
@@ -143,6 +146,11 @@ else:
                 width: 100% !important;
                 border: none !important;
                 margin-top: 0.5rem;
+                box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+            }
+            div[data-testid="stFormSubmitButton"] button:hover {
+                background-color: #1d4ed8 !important;
+                border: none !important;
             }
             
             /* Estilo da imagem para o lado esquerdo */
@@ -154,12 +162,11 @@ else:
                 min-height: 500px;
             }
             
-            /* Separador "ou" */
             .separator {
                 display: flex;
                 align-items: center;
                 text-align: center;
-                margin: 1rem 0;
+                margin: 0.8rem 0;
                 color: #9ca3af;
                 font-size: 0.8rem;
             }
@@ -173,11 +180,12 @@ else:
         </style>
         """, unsafe_allow_html=True)
         
-        # Centralização do Card
-        _, center_col, _ = st.columns([0.05, 1, 0.05])
+        # Centralização do Card no Streamlit
+        st.markdown('<div style="display: flex; justify-content: center; width: 100%;">', unsafe_allow_html=True)
         
-        with center_col:
-            # Layout de duas colunas dentro do card
+        # Usamos um layout de colunas para simular o card centralizado
+        col_main = st.columns([1])[0]
+        with col_main:
             with st.container(border=True):
                 col_img, col_login = st.columns([1.2, 1], gap="large")
                 
@@ -188,12 +196,12 @@ else:
                 
                 with col_login:
                     st.markdown("""
-                    <div style="padding: 30px 35px 30px 20px;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 30px;">
+                    <div style="padding: 25px 40px 25px 10px; display: flex; flex-direction: column; align-items: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 25px; width: 100%;">
                             <div style="background: #2563eb; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">I</div>
                             <span style="font-weight: 700; font-size: 1.1rem; color: #111827;">Inteligência PNCP</span>
                         </div>
-                        <div class="login-header">
+                        <div class="login-header" style="width: 100%;">
                             <h1>Bem-vindo de volta!</h1>
                             <p>Acesse sua conta para continuar</p>
                         </div>
@@ -204,7 +212,7 @@ else:
                         senha = st.text_input("Senha", type="password", placeholder="********")
                         
                         st.markdown("""
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-top: -10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-top: -10px; margin-bottom: 10px;">
                             <label style="display: flex; align-items: center; gap: 5px; color: #4b5563;"><input type="checkbox"> Lembrar de mim</label>
                             <a href="#" style="color: #2563eb; text-decoration: none; font-weight: 500;">Esqueci a senha</a>
                         </div>
@@ -229,15 +237,16 @@ else:
                                         st.error("Erro de conexão.")
                     
                     st.markdown("""
-                        <div class="separator">ou</div>
-                        <button style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 0.9rem;">
+                        <div class="separator" style="width: 100%;">ou</div>
+                        <button style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 0.85rem;">
                             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16"> Entrar com Google
                         </button>
-                        <p style="text-align: center; font-size: 0.8rem; color: #6b7280; margin-top: 1.5rem;">
+                        <p style="text-align: center; font-size: 0.8rem; color: #6b7280; margin-top: 1.2rem; width: 100%;">
                             Não tem conta? <a href="#" style="color: #2563eb; text-decoration: none; font-weight: 600;">Cadastre-se</a>
                         </p>
                     </div>
                     """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
 
     # Se chegou aqui, o usuário está logado.
