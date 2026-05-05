@@ -87,14 +87,14 @@ else:
             }
             .login-header h2 {
                 color: #0f172a;
-                font-size: 4.8rem;
+                font-size: 2.2rem;
                 font-weight: 600;
-                margin-bottom: 0.4rem;
+                margin-bottom: 0.2rem;
                 letter-spacing: -0.02em;
             }
             .login-header p {
                 color: #64748b;
-                font-size: 0.85rem;
+                font-size: 0.8rem;
                 margin: 0;
             }
             div[data-testid="stTextInput"] label p {
@@ -110,7 +110,7 @@ else:
         </style>
         """, unsafe_allow_html=True)
         
-        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
         col_img, col_login = st.columns([1.1, 1], gap="large")
         
         with col_img:
