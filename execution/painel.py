@@ -70,115 +70,135 @@ else:
             #MainMenu, footer, header {visibility: hidden;}
             .stApp { 
                 font-family: 'Inter', sans-serif; 
-                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                background-color: #f3f4f6;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
-            /* Esconder a barra lateral na tela de login */
-            [data-testid="stSidebar"] {
-                display: none;
-            }
-            .main-container {
-                display: flex;
-                width: 900px;
+            [data-testid="stSidebar"] { display: none; }
+            
+            /* Container principal estilo Card */
+            div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stForm"]) {
                 background: white;
                 border-radius: 24px;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                padding: 0 !important;
                 overflow: hidden;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             }
+            
             div[data-testid="stForm"] {
                 border: none !important;
                 padding: 0 !important;
-                background: transparent !important;
             }
-            .login-section {
-                padding: 48px;
-                width: 100%;
-            }
-            .login-header h2 {
-                color: #0f172a;
-                font-size: 1.8rem;
-                font-weight: 700;
-                margin-bottom: 0.5rem;
-                letter-spacing: -0.03em;
-            }
-            .login-header p {
-                color: #64748b;
-                font-size: 0.9rem;
+            
+            .login-header {
                 margin-bottom: 2rem;
             }
-            .stButton > button {
-                background-color: #3b82f6 !important;
-                color: white !important;
-                border-radius: 12px !important;
-                padding: 12px 24px !important;
-                font-weight: 600 !important;
-                height: 3.5rem !important;
-                border: none !important;
-                transition: all 0.2s ease !important;
+            .login-header h1 {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #111827;
+                margin-bottom: 0.5rem;
             }
-            .stButton > button:hover {
-                background-color: #2563eb !important;
-                transform: translateY(-2px);
-                box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+            .login-header p {
+                font-size: 0.95rem;
+                color: #6b7280;
+            }
+            
+            /* Estilização de Inputs */
+            div[data-testid="stTextInput"] label p {
+                font-weight: 600;
+                color: #374151;
+                font-size: 0.9rem;
+                margin-bottom: 6px;
             }
             div[data-testid="stTextInput"] input {
-                border-radius: 12px !important;
-                border: 1px solid #e2e8f0 !important;
-                padding: 12px 16px !important;
-                height: 3.5rem !important;
+                border-radius: 10px !important;
+                border: 1px solid #d1d5db !important;
+                padding: 12px !important;
+                background-color: #ffffff !important;
             }
-            div[data-testid="stTextInput"] label {
+            
+            /* Botão Entrar */
+            .stButton > button {
+                background-color: #2563eb !important;
+                color: white !important;
+                border-radius: 10px !important;
+                padding: 14px !important;
                 font-weight: 600 !important;
-                color: #475569 !important;
-                font-size: 0.85rem !important;
-                margin-bottom: 8px !important;
+                font-size: 1rem !important;
+                width: 100% !important;
+                border: none !important;
+                margin-top: 1rem;
             }
-            .img-container img {
+            
+            /* Estilo da imagem para preencher o lado direito */
+            .img-side {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                border-radius: 16px;
+                border-radius: 0 24px 24px 0;
             }
+            
+            /* Separador "ou" */
+            .separator {
+                display: flex;
+                align-items: center;
+                text-align: center;
+                margin: 1.5rem 0;
+                color: #9ca3af;
+                font-size: 0.85rem;
+            }
+            .separator::before, .separator::after {
+                content: '';
+                flex: 1;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .separator:not(:empty)::before { margin-right: .5em; }
+            .separator:not(:empty)::after { margin-left: .5em; }
         </style>
         """, unsafe_allow_html=True)
         
-        # Centralização manual via colunas para o Streamlit
-        _, center_col, _ = st.columns([0.2, 1, 0.2])
+        # Centralização do Card
+        _, center_col, _ = st.columns([0.1, 1, 0.1])
         
         with center_col:
             st.markdown("<br><br>", unsafe_allow_html=True)
-            # Criando um container branco estilo "Card"
+            # Layout de duas colunas dentro do card
             with st.container(border=True):
-                col_img, col_login = st.columns([1.2, 1], gap="large")
-                
-                with col_img:
-                    img_path = os.path.join(os.path.dirname(__file__), "login_image.png")
-                    if os.path.exists(img_path):
-                        st.markdown('<div class="img-container">', unsafe_allow_html=True)
-                        st.image(img_path, use_container_width=True)
-                        st.markdown('</div>', unsafe_allow_html=True)
+                col_login, col_img = st.columns([1, 1.2], gap="large")
                 
                 with col_login:
                     st.markdown("""
-                    <div class="login-header">
-                        <h2>🏛️ Inteligência PNCP</h2>
-                        <p>Bem-vindo ao futuro da pesquisa de preços governamentais.</p>
-                    </div>
+                    <div style="padding: 40px 20px 40px 40px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 40px;">
+                            <div style="background: #2563eb; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">P</div>
+                            <span style="font-weight: 700; font-size: 1.2rem; color: #111827;">PNCP Access</span>
+                        </div>
+                        <div class="login-header">
+                            <h1>Bem-vindo de volta!</h1>
+                            <p>Acesse sua conta para continuar</p>
+                        </div>
                     """, unsafe_allow_html=True)
                     
                     with st.form("login_form"):
-                        email = st.text_input("E-mail corporativo", placeholder="exemplo@ederconti.adv.br")
-                        senha = st.text_input("Senha de acesso", type="password", placeholder="Sua senha secreta")
-                        st.markdown("<br>", unsafe_allow_html=True)
-                        submit = st.form_submit_button("Acessar Painel", type="primary", use_container_width=True)
+                        email = st.text_input("E-mail", placeholder="seu@email.com")
+                        senha = st.text_input("Senha", type="password", placeholder="********")
+                        
+                        st.markdown("""
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-top: -10px;">
+                            <label style="display: flex; align-items: center; gap: 5px; color: #4b5563;"><input type="checkbox"> Lembrar de mim</label>
+                            <a href="#" style="color: #2563eb; text-decoration: none; font-weight: 500;">Esqueci minha senha</a>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        submit = st.form_submit_button("Entrar", type="primary", use_container_width=True)
                         
                         if submit:
                             if not email or not senha:
-                                st.warning("Por favor, preencha todos os campos.")
+                                st.warning("Preencha todos os campos.")
                             else:
-                                with st.spinner("Verificando credenciais..."):
+                                with st.spinner("Autenticando..."):
                                     try:
                                         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
                                         r = requests.post(url, json={"email": email, "password": senha, "returnSecureToken": True})
@@ -186,9 +206,25 @@ else:
                                             st.session_state['usuario_logado'] = True
                                             st.rerun()
                                         else:
-                                            st.error("Credenciais inválidas. Tente novamente.")
+                                            st.error("E-mail ou senha incorretos.")
                                     except Exception as e:
-                                        st.error("Falha na conexão com o servidor.")
+                                        st.error("Erro na conexão.")
+                    
+                    st.markdown("""
+                        <div class="separator">ou</div>
+                        <button style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Entrar com Google
+                        </button>
+                        <p style="text-align: center; font-size: 0.85rem; color: #6b7280; margin-top: 2rem;">
+                            Ainda não tem uma conta? <a href="#" style="color: #2563eb; text-decoration: none; font-weight: 600;">Cadastre-se</a>
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with col_img:
+                    img_path = os.path.join(os.path.dirname(__file__), "login_image.png")
+                    if os.path.exists(img_path):
+                        st.markdown(f'<img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" class="img-side">', unsafe_allow_html=True)
         st.stop()
 
     # Se chegou aqui, o usuário está logado.
