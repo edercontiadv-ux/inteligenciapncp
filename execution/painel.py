@@ -145,12 +145,12 @@ else:
                 margin-top: 0.5rem;
             }
             
-            /* Estilo da imagem para preencher o lado direito */
+            /* Estilo da imagem para o lado esquerdo */
             .img-side {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                border-radius: 0 24px 24px 0;
+                border-radius: 24px 0 0 24px;
                 min-height: 500px;
             }
             
@@ -179,14 +179,19 @@ else:
         with center_col:
             # Layout de duas colunas dentro do card
             with st.container(border=True):
-                col_login, col_img = st.columns([1, 1.2], gap="large")
+                col_img, col_login = st.columns([1.2, 1], gap="large")
+                
+                with col_img:
+                    img_path = os.path.join(os.path.dirname(__file__), "login_image.png")
+                    if os.path.exists(img_path):
+                        st.markdown(f'<img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" class="img-side">', unsafe_allow_html=True)
                 
                 with col_login:
                     st.markdown("""
-                    <div style="padding: 30px 20px 30px 35px;">
+                    <div style="padding: 30px 35px 30px 20px;">
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 30px;">
-                            <div style="background: #2563eb; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">P</div>
-                            <span style="font-weight: 700; font-size: 1.1rem; color: #111827;">PNCP Access</span>
+                            <div style="background: #2563eb; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">I</div>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: #111827;">Inteligência PNCP</span>
                         </div>
                         <div class="login-header">
                             <h1>Bem-vindo de volta!</h1>
@@ -233,11 +238,6 @@ else:
                         </p>
                     </div>
                     """, unsafe_allow_html=True)
-                
-                with col_img:
-                    img_path = os.path.join(os.path.dirname(__file__), "login_image.png")
-                    if os.path.exists(img_path):
-                        st.markdown(f'<img src="data:image/png;base64,{base64.b64encode(open(img_path, "rb").read()).decode()}" class="img-side">', unsafe_allow_html=True)
         st.stop()
 
     # Se chegou aqui, o usuário está logado.
