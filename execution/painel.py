@@ -87,7 +87,7 @@ else:
             }
             .login-header h2 {
                 color: #0f172a;
-                font-size: 1.6rem;
+                font-size: 4.8rem;
                 font-weight: 600;
                 margin-bottom: 0.4rem;
                 letter-spacing: -0.02em;
