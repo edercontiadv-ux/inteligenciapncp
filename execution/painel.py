@@ -68,35 +68,78 @@ else:
         st.markdown("""
         <style>
             #MainMenu, footer, header {visibility: hidden;}
-            .stApp { font-family: 'Inter', sans-serif; background-color: #f8f9fb; }
+            .stApp { 
+                font-family: 'Inter', sans-serif; 
+                background-color: #f8f9fb; 
+                background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+                background-size: 30px 30px;
+            }
+            div[data-testid="stForm"] {
+                background-color: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 16px;
+                padding: 32px 24px;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            }
+            .login-header {
+                text-align: center;
+                margin-bottom: 1.5rem;
+            }
+            .login-header h2 {
+                color: #0f172a;
+                font-size: 1.6rem;
+                font-weight: 600;
+                margin-bottom: 0.4rem;
+                letter-spacing: -0.02em;
+            }
+            .login-header p {
+                color: #64748b;
+                font-size: 0.85rem;
+                margin: 0;
+            }
+            div[data-testid="stTextInput"] label p {
+                font-weight: 500;
+                color: #334155;
+            }
+            div[data-testid="stFormSubmitButton"] button {
+                border-radius: 8px;
+                font-weight: 600;
+                padding: 6px 0;
+                margin-top: 10px;
+            }
         </style>
         """, unsafe_allow_html=True)
         
-        st.markdown("<br><br><br>", unsafe_allow_html=True)
+        st.markdown("<br><br><br><br>", unsafe_allow_html=True)
         col1, col2, col3 = st.columns([1, 1.2, 1])
         with col2:
-            st.markdown("<h2 style='text-align: center; color: #0f172a; margin-bottom: 20px;'>Acesso Restrito</h2>", unsafe_allow_html=True)
-            with st.container(border=True):
-                with st.form("login_form"):
-                    email = st.text_input("E-mail", placeholder="seu@email.com")
-                    senha = st.text_input("Senha", type="password", placeholder="••••••••")
-                    submit = st.form_submit_button("Entrar", type="primary", use_container_width=True)
-                    
-                    if submit:
-                        if not email or not senha:
-                            st.warning("Preencha e-mail e senha.")
-                        else:
-                            with st.spinner("Autenticando..."):
-                                try:
-                                    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
-                                    r = requests.post(url, json={"email": email, "password": senha, "returnSecureToken": True})
-                                    if r.status_code == 200:
-                                        st.session_state['usuario_logado'] = True
-                                        st.rerun()
-                                    else:
-                                        st.error("E-mail ou senha incorretos.")
-                                except Exception as e:
-                                    st.error("Erro ao conectar no servidor de autenticação.")
+            st.markdown("""
+            <div class="login-header">
+                <h2>🏛️ Inteligência PNCP</h2>
+                <p>Faça login para acessar o painel de pesquisa</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            with st.form("login_form"):
+                email = st.text_input("E-mail corporativo", placeholder="seu@email.com")
+                senha = st.text_input("Senha", type="password", placeholder="••••••••")
+                submit = st.form_submit_button("Entrar no sistema", type="primary", use_container_width=True)
+                
+                if submit:
+                    if not email or not senha:
+                        st.warning("Preencha e-mail e senha.")
+                    else:
+                        with st.spinner("Verificando credenciais..."):
+                            try:
+                                url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+                                r = requests.post(url, json={"email": email, "password": senha, "returnSecureToken": True})
+                                if r.status_code == 200:
+                                    st.session_state['usuario_logado'] = True
+                                    st.rerun()
+                                else:
+                                    st.error("E-mail ou senha incorretos. Verifique suas credenciais.")
+                            except Exception as e:
+                                st.error("Erro ao conectar no servidor de autenticação.")
         st.stop()
 
     # Se chegou aqui, o usuário está logado.
