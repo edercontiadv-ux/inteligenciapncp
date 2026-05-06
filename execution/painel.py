@@ -65,226 +65,141 @@ else:
         st.session_state['usuario_logado'] = False
 
     if not st.session_state['usuario_logado']:
+        # CSS Minimalista e Robusto (Nativo do Streamlit)
         st.markdown("""
-        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
         <style>
             #MainMenu, footer, header {visibility: hidden;}
             
-            :root {
-                --blue-primary: #2563EB;
-                --blue-deep: #1E40AF;
-                --blue-electric: #3B82F6;
-                --blue-glow: #60A5FA;
-                --navy-dark: #030D1A;
-                --navy-mid: #061530;
-                --navy-card: #0A1E38;
-                --text-white: #F0F6FF;
-                --text-muted: #7BA7D4;
-                --text-faint: #4A6FA5;
-                --border-subtle: rgba(96, 165, 250, 0.15);
-                --border-active: rgba(96, 165, 250, 0.5);
-            }
-
-            .stApp { 
-                background: var(--navy-dark) !important;
-                font-family: 'Sora', sans-serif;
-                height: 100vh;
-                overflow: hidden;
+            /* Fundo Navy Profissional */
+            .stApp {
+                background: linear-gradient(135deg, #030D1A 0%, #061530 100%) !important;
+                font-family: 'Inter', sans-serif;
             }
             
-            .main .block-container {
-                padding: 0 !important;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100vh;
-                max-width: 100% !important;
-            }
-
-            /* Background Elements */
-            .bg-grid {
-                position: fixed;
-                inset: 0;
-                background-image:
-                linear-gradient(rgba(37,99,235,0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(37,99,235,0.06) 1px, transparent 1px);
-                background-size: 40px 40px;
-                animation: gridDrift 20s linear infinite;
-                pointer-events: none;
-                z-index: 0;
-            }
-            @keyframes gridDrift {
-                0% { transform: translate(0, 0); }
-                100% { transform: translate(40px, 40px); }
-            }
-            .blob {
-                position: fixed;
-                border-radius: 50%;
-                filter: blur(80px);
-                opacity: 0.18;
-                pointer-events: none;
-                z-index: 0;
-                animation: blobPulse 8s ease-in-out infinite alternate;
-            }
-            .blob-1 { width: 500px; height: 500px; background: #2563EB; top: -150px; right: -100px; }
-            .blob-2 { width: 350px; height: 350px; background: #1D4ED8; bottom: -100px; left: -100px; animation-delay: 3s; }
-            @keyframes blobPulse {
-                0% { opacity: 0.12; transform: scale(1); }
-                100% { opacity: 0.22; transform: scale(1.1); }
-            }
-            .scanline {
-                position: fixed;
-                inset: 0;
-                background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-                pointer-events: none;
-                z-index: 1;
-            }
-
-            /* Card Styling */
-            div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stForm"]) {
-                background: rgba(6, 21, 48, 0.75) !important;
-                border: 1px solid var(--border-subtle) !important;
-                border-radius: 24px !important;
-                padding: 60px !important;
-                backdrop-filter: blur(24px) !important;
-                box-shadow: 0 32px 80px rgba(0,0,0,0.6) !important;
-                width: 580px !important;
-                margin: auto;
-                position: relative;
-                z-index: 10;
+            /* Container do Card - Responsivo */
+            .login-card {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 20px;
+                padding: 50px;
+                backdrop-filter: blur(15px);
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                margin-top: 50px;
+                width: 100%;
+                max-width: 550px;
+                margin-left: auto;
+                margin-right: auto;
             }
             
-            div[data-testid="stForm"] { border: none !important; background: transparent !important; }
-            
-            .logo-text {
-                font-size: 24px;
-                font-weight: 600;
-                color: var(--text-white);
+            /* Textos */
+            .login-title {
+                color: #FFFFFF;
+                font-size: 2.5rem;
+                font-weight: 800;
+                text-align: center;
+                margin-bottom: 10px;
+                letter-spacing: -1px;
+            }
+            .login-subtitle {
+                color: #7BA7D4;
+                font-size: 1.1rem;
+                text-align: center;
                 margin-bottom: 40px;
-                display: flex;
-                align-items: center;
-                gap: 12px;
             }
-            .logo-text span { color: var(--blue-glow); font-weight: 700; }
             
-            h1 { font-size: 34px !important; font-weight: 700 !important; color: var(--text-white) !important; letter-spacing: -0.8px !important; margin-bottom: 12px !important; }
-            .heading-p { color: var(--text-muted) !important; font-size: 16px !important; margin-bottom: 35px !important; }
-            
-            /* Inputs */
+            /* Inputs Nativo Custom */
             div[data-testid="stTextInput"] label p {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 13px !important;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                color: var(--text-muted) !important;
-                margin-bottom: 8px !important;
+                color: #FFFFFF !important;
+                font-weight: 500 !important;
+                font-size: 0.95rem !important;
             }
             div[data-testid="stTextInput"] input {
-                background: rgba(255,255,255,0.04) !important;
-                border: 1px solid var(--border-subtle) !important;
-                border-radius: 12px !important;
-                color: var(--text-white) !important;
-                padding: 16px !important;
-                font-size: 16px !important;
-            }
-            div[data-testid="stTextInput"] input:focus {
-                border-color: var(--border-active) !important;
-                box-shadow: 0 0 0 4px rgba(59,130,246,0.15) !important;
-            }
-            
-            /* Button */
-            div[data-testid="stFormSubmitButton"] button {
-                background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-electric) 100%) !important;
-                border: none !important;
-                border-radius: 12px !important;
-                padding: 18px !important;
+                background-color: rgba(255, 255, 255, 0.07) !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
                 color: white !important;
-                font-weight: 600 !important;
-                font-size: 18px !important;
-                box-shadow: 0 4px 20px rgba(37,99,235,0.4) !important;
-                transition: transform 0.15s !important;
-                width: 100% !important;
-                margin-top: 10px !important;
-            }
-            div[data-testid="stFormSubmitButton"] button:hover {
-                transform: translateY(-2px) !important;
-                box-shadow: 0 8px 30px rgba(37,99,235,0.5) !important;
+                border-radius: 12px !important;
+                padding: 14px !important;
+                font-size: 1.1rem !important;
             }
             
-            .divider {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                margin: 30px 0;
+            /* Botão de Login */
+            .stButton > button {
+                background: #2563EB !important;
+                color: white !important;
+                font-weight: 700 !important;
+                font-size: 1.2rem !important;
+                border-radius: 12px !important;
+                padding: 15px !important;
+                border: none !important;
+                margin-top: 20px;
+                width: 100% !important;
+                box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+                transition: all 0.3s ease;
             }
-            .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
-            .divider span { font-size: 14px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+            .stButton > button:hover {
+                background: #1D4ED8 !important;
+                transform: translateY(-2px);
+                box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.5);
+            }
+            
+            /* Grid de Fundo */
+            .bg-overlay {
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+                background-size: 40px 40px;
+                z-index: -1;
+            }
         </style>
-        
-        <div class="bg-grid"></div>
-        <div class="scanline"></div>
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
+        <div class="bg-overlay"></div>
         """, unsafe_allow_html=True)
         
-        st.markdown('<div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100vh;">', unsafe_allow_html=True)
+        # Centralização usando colunas nativas
+        _, col_login, _ = st.columns([0.5, 2, 0.5])
         
-        # Centralizando o conteúdo
-        col_main = st.columns([1])[0]
-        with col_main:
-            with st.container():
+        with col_login:
+            st.markdown('<div class="login-card">', unsafe_allow_html=True)
+            
+            # Cabeçalho do Login
+            st.markdown('<h1 class="login-title">Inteligência PNCP</h1>', unsafe_allow_html=True)
+            st.markdown('<p class="login-subtitle">Acesse o painel administrativo</p>', unsafe_allow_html=True)
+            
+            with st.form("login_form"):
+                email = st.text_input("E-mail", placeholder="seu@email.com")
+                senha = st.text_input("Senha", type="password", placeholder="••••••••")
+                
                 st.markdown("""
-                <div class="logo-text">
-                    <svg width="42" height="42" viewBox="0 0 36 36" fill="none">
-                        <polygon points="18,2 34,11 34,25 18,34 2,25 2,11" fill="none" stroke="#2563EB" stroke-width="2"/>
-                        <polygon points="18,8 28,13.5 28,24.5 18,30 8,24.5 8,13.5" fill="#2563EB" opacity="0.3"/>
-                        <polygon points="18,13 23,15.8 23,21.2 18,24 13,21.2 13,15.8" fill="#60A5FA"/>
-                    </svg>
-                    <span>Inteligência</span>PNCP
+                <div style="display: flex; justify-content: space-between; margin-top: -10px; margin-bottom: 20px;">
+                    <span style="color: #7BA7D4; font-size: 0.9rem;">Lembrar de mim</span>
+                    <a href="#" style="color: #2563EB; font-size: 0.9rem; text-decoration: none;">Esqueci a senha</a>
                 </div>
-                <h1>Bem-vindo de volta!</h1>
-                <p class="heading-p">Acesse sua conta para continuar</p>
                 """, unsafe_allow_html=True)
                 
-                with st.form("login_form"):
-                    email = st.text_input("E-mail", placeholder="seu@email.com")
-                    senha = st.text_input("Senha", type="password", placeholder="••••••••")
-                    
-                    st.markdown("""
-                    <div style="display: flex; justify-content: space-between; margin-top: -5px; margin-bottom: 25px;">
-                        <span style="font-size: 14px; color: #7BA7D4;">Lembrar de mim</span>
-                        <a href="#" style="font-size: 14px; color: #3B82F6; text-decoration: none; font-weight: 500;">Esqueci minha senha</a>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    submit = st.form_submit_button("Entrar", use_container_width=True)
-                    
-                    if submit:
-                        if not email or not senha:
-                            st.warning("Preencha os campos.")
-                        else:
-                            with st.spinner("Autenticando..."):
-                                try:
-                                    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
-                                    r = requests.post(url, json={"email": email, "password": senha, "returnSecureToken": True})
-                                    if r.status_code == 200:
-                                        st.session_state['usuario_logado'] = True
-                                        st.rerun()
-                                    else:
-                                        st.error("Credenciais incorretas.")
-                                except Exception as e:
-                                    st.error("Erro de conexão.")
+                submit = st.form_submit_button("ENTRAR NO PAINEL", use_container_width=True)
                 
-                st.markdown("""
-                <div class="divider"><span>ou</span></div>
-                <button style="width: 100%; padding: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(96, 165, 250, 0.15); border-radius: 12px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; font-family: 'Sora'; font-size: 16px; margin-bottom: 30px; transition: background 0.2s;">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Entrar com Google
-                </button>
-                <p style="text-align: center; font-size: 15px; color: #4A6FA5;">
-                    Ainda não tem conta? <a href="#" style="color: #3B82F6; text-decoration: none; font-weight: 600;">Cadastre-se</a>
-                </p>
-                """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+                if submit:
+                    if not email or not senha:
+                        st.warning("Preencha todos os campos.")
+                    else:
+                        with st.spinner("Autenticando..."):
+                            try:
+                                url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+                                r = requests.post(url, json={"email": email, "password": senha, "returnSecureToken": True})
+                                if r.status_code == 200:
+                                    st.session_state['usuario_logado'] = True
+                                    st.rerun()
+                                else:
+                                    st.error("Credenciais incorretas.")
+                            except Exception as e:
+                                st.error("Erro de conexão.")
+            
+            st.markdown("""
+            <p style="text-align: center; color: #7BA7D4; margin-top: 30px; font-size: 0.9rem;">
+                Dificuldades no acesso? <a href="#" style="color: #2563EB; text-decoration: none;">Suporte Técnico</a>
+            </p>
+            """, unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
         st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
