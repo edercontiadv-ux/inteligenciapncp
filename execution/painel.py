@@ -144,11 +144,11 @@ else:
             div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stForm"]) {
                 background: rgba(6, 21, 48, 0.75) !important;
                 border: 1px solid var(--border-subtle) !important;
-                border-radius: 20px !important;
-                padding: 40px !important;
+                border-radius: 24px !important;
+                padding: 60px !important;
                 backdrop-filter: blur(24px) !important;
                 box-shadow: 0 32px 80px rgba(0,0,0,0.6) !important;
-                width: 420px !important;
+                width: 580px !important;
                 margin: auto;
                 position: relative;
                 z-index: 10;
@@ -157,50 +157,54 @@ else:
             div[data-testid="stForm"] { border: none !important; background: transparent !important; }
             
             .logo-text {
-                font-size: 18px;
+                font-size: 24px;
                 font-weight: 600;
                 color: var(--text-white);
-                margin-bottom: 30px;
+                margin-bottom: 40px;
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 12px;
             }
             .logo-text span { color: var(--blue-glow); font-weight: 700; }
             
-            h1 { font-size: 26px !important; font-weight: 700 !important; color: var(--text-white) !important; letter-spacing: -0.5px !important; margin-bottom: 8px !important; }
-            .heading-p { color: var(--text-muted) !important; font-size: 13.5px !important; margin-bottom: 25px !important; }
+            h1 { font-size: 34px !important; font-weight: 700 !important; color: var(--text-white) !important; letter-spacing: -0.8px !important; margin-bottom: 12px !important; }
+            .heading-p { color: var(--text-muted) !important; font-size: 16px !important; margin-bottom: 35px !important; }
             
             /* Inputs */
             div[data-testid="stTextInput"] label p {
                 font-family: 'JetBrains Mono', monospace;
-                font-size: 11px !important;
+                font-size: 13px !important;
                 text-transform: uppercase;
-                letter-spacing: 0.8px;
+                letter-spacing: 1px;
                 color: var(--text-muted) !important;
+                margin-bottom: 8px !important;
             }
             div[data-testid="stTextInput"] input {
                 background: rgba(255,255,255,0.04) !important;
                 border: 1px solid var(--border-subtle) !important;
-                border-radius: 10px !important;
+                border-radius: 12px !important;
                 color: var(--text-white) !important;
-                padding: 12px !important;
+                padding: 16px !important;
+                font-size: 16px !important;
             }
             div[data-testid="stTextInput"] input:focus {
                 border-color: var(--border-active) !important;
-                box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
+                box-shadow: 0 0 0 4px rgba(59,130,246,0.15) !important;
             }
             
             /* Button */
             div[data-testid="stFormSubmitButton"] button {
                 background: linear-gradient(135deg, var(--blue-primary) 0%, var(--blue-electric) 100%) !important;
                 border: none !important;
-                border-radius: 10px !important;
-                padding: 14px !important;
+                border-radius: 12px !important;
+                padding: 18px !important;
                 color: white !important;
                 font-weight: 600 !important;
+                font-size: 18px !important;
                 box-shadow: 0 4px 20px rgba(37,99,235,0.4) !important;
                 transition: transform 0.15s !important;
                 width: 100% !important;
+                margin-top: 10px !important;
             }
             div[data-testid="stFormSubmitButton"] button:hover {
                 transform: translateY(-2px) !important;
@@ -210,11 +214,11 @@ else:
             .divider {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                margin: 20px 0;
+                gap: 15px;
+                margin: 30px 0;
             }
             .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
-            .divider span { font-size: 12px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+            .divider span { font-size: 14px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
         </style>
         
         <div class="bg-grid"></div>
@@ -231,7 +235,7 @@ else:
             with st.container():
                 st.markdown("""
                 <div class="logo-text">
-                    <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+                    <svg width="42" height="42" viewBox="0 0 36 36" fill="none">
                         <polygon points="18,2 34,11 34,25 18,34 2,25 2,11" fill="none" stroke="#2563EB" stroke-width="2"/>
                         <polygon points="18,8 28,13.5 28,24.5 18,30 8,24.5 8,13.5" fill="#2563EB" opacity="0.3"/>
                         <polygon points="18,13 23,15.8 23,21.2 18,24 13,21.2 13,15.8" fill="#60A5FA"/>
@@ -247,9 +251,9 @@ else:
                     senha = st.text_input("Senha", type="password", placeholder="••••••••")
                     
                     st.markdown("""
-                    <div style="display: flex; justify-content: space-between; margin-top: -10px; margin-bottom: 20px;">
-                        <span style="font-size: 13px; color: #7BA7D4;">Lembrar de mim</span>
-                        <a href="#" style="font-size: 13px; color: #3B82F6; text-decoration: none;">Esqueci minha senha</a>
+                    <div style="display: flex; justify-content: space-between; margin-top: -5px; margin-bottom: 25px;">
+                        <span style="font-size: 14px; color: #7BA7D4;">Lembrar de mim</span>
+                        <a href="#" style="font-size: 14px; color: #3B82F6; text-decoration: none; font-weight: 500;">Esqueci minha senha</a>
                     </div>
                     """, unsafe_allow_html=True)
                     
@@ -273,13 +277,15 @@ else:
                 
                 st.markdown("""
                 <div class="divider"><span>ou</span></div>
-                <button style="width: 100%; padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(96, 165, 250, 0.15); border-radius: 10px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Sora'; font-size: 14px; margin-bottom: 20px;">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="16"> Entrar com Google
+                <button style="width: 100%; padding: 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(96, 165, 250, 0.15); border-radius: 12px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; font-family: 'Sora'; font-size: 16px; margin-bottom: 30px; transition: background 0.2s;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"> Entrar com Google
                 </button>
-                <p style="text-align: center; font-size: 13px; color: #4A6FA5;">
-                    Ainda não tem conta? <a href="#" style="color: #3B82F6; text-decoration: none;">Cadastre-se</a>
+                <p style="text-align: center; font-size: 15px; color: #4A6FA5;">
+                    Ainda não tem conta? <a href="#" style="color: #3B82F6; text-decoration: none; font-weight: 600;">Cadastre-se</a>
                 </p>
                 """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.stop()
         st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
 
