@@ -52,6 +52,8 @@ else:
             .stDeployButton {display:none;}
             div[data-testid="stStatusWidget"] {display:none;}
             [data-testid="stDecoration"] {display:none;}
+            div[data-testid="stViewerBadge"] {display: none !important;}
+            .viewerBadge_container__1QSob {display: none !important;}
             
             .stApp {
                 background: radial-gradient(circle at 50% 50%, #060B1A 0%, #02040A 100%) !important;

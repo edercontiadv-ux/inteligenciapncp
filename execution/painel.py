@@ -72,6 +72,8 @@ else:
             .stDeployButton {display:none;}
             div[data-testid="stStatusWidget"] {display:none;}
             [data-testid="stDecoration"] {display:none;}
+            div[data-testid="stViewerBadge"] {display: none !important;}
+            .viewerBadge_container__1QSob {display: none !important;}
             
             /* Fundo Navy Profissional com Gradiente Dinâmico */
             .stApp {
