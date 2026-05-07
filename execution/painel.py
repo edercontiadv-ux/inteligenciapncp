@@ -128,27 +128,28 @@ else:
                 max-width: 440px !important;
             }
 
-            /* Inputs Compactos com Contraste Garantido */
+            /* Inputs Refinados com Alta Visibilidade */
             div[data-testid="stTextInput"] label p {
-                color: #94a3b8 !important;
-                font-weight: 600 !important;
-                font-size: 0.85rem !important;
-                margin-bottom: 6px !important;
+                color: #cbd5e1 !important;
+                font-weight: 500 !important;
+                font-size: 0.9rem !important;
+                margin-bottom: 8px !important;
+                letter-spacing: 0.5px;
             }
             div[data-testid="stTextInput"] input {
-                background-color: #030712 !important;
-                border: 1px solid rgba(255, 255, 255, 0.15) !important;
-                color: #FFFFFF !important;
-                border-radius: 12px !important;
-                padding: 15px 15px !important;
+                background-color: #1e293b !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                color: #ffffff !important;
+                border-radius: 10px !important;
+                padding: 12px 16px !important;
                 font-size: 1rem !important;
                 transition: all 0.3s ease !important;
-                height: 45px !important;
+                height: 50px !important;
             }
             div[data-testid="stTextInput"] input:focus {
                 border-color: #3b82f6 !important;
-                background-color: rgba(255, 255, 255, 0.08) !important;
-                box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.25) !important;
+                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+                background-color: #0f172a !important;
             }
             
             /* Botão de Login Compacto */

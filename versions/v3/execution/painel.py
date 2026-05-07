@@ -114,29 +114,29 @@ else:
                 max-width: 550px !important;
             }
 
-            /* Inputs com Design Refinado e Contraste Máximo */
+            /* Inputs com Design Premium e Contraste Máximo */
             div[data-testid="stTextInput"] label p {
-                color: #94a3b8 !important;
-                font-weight: 600 !important;
-                font-size: 0.85rem !important;
-                margin-bottom: 8px !important;
+                color: #cbd5e1 !important;
+                font-weight: 500 !important;
+                font-size: 0.9rem !important;
+                margin-bottom: 10px !important;
                 text-transform: uppercase;
                 letter-spacing: 1px;
             }
             div[data-testid="stTextInput"] input {
-                background-color: #030712 !important;
+                background-color: #1e293b !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                color: #FFFFFF !important;
-                border-radius: 12px !important;
-                padding: 15px 15px !important;
+                color: #ffffff !important;
+                border-radius: 10px !important;
+                padding: 12px 16px !important;
                 font-size: 1rem !important;
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                height: 45px !important;
+                height: 50px !important;
             }
             div[data-testid="stTextInput"] input:focus {
-                border-color: #3b82f6 !important;
-                background-color: rgba(255, 255, 255, 0.06) !important;
-                box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.15) !important;
+                border-color: #60a5fa !important;
+                box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2) !important;
+                background-color: #0f172a !important;
             }
             
             /* Botão de Login de Alta Performance */
