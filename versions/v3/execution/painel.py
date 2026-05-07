@@ -109,7 +109,7 @@ else:
                 max-width: 550px !important;
             }
 
-            /* Inputs com Design Refinado */
+            /* Inputs com Design Refinado e Contraste Máximo */
             div[data-testid="stTextInput"] label p {
                 color: #94a3b8 !important;
                 font-weight: 600 !important;
@@ -119,9 +119,9 @@ else:
                 letter-spacing: 1px;
             }
             div[data-testid="stTextInput"] input {
-                background-color: rgba(255, 255, 255, 0.03) !important;
+                background-color: #030712 !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                color: white !important;
+                color: #FFFFFF !important;
                 border-radius: 12px !important;
                 padding: 15px 15px !important;
                 font-size: 1rem !important;
