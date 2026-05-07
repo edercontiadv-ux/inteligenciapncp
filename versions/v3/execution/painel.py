@@ -59,12 +59,12 @@ else:
             [data-testid="stColumn"]:nth-of-type(2) [data-testid="stVerticalBlock"] {
                 background: rgba(255, 255, 255, 0.02) !important;
                 border: 1px solid rgba(255, 255, 255, 0.08) !important;
-                border-radius: 40px !important;
-                padding: 100px 70px !important;
+                border-radius: 30px !important;
+                padding: 60px 45px !important;
                 backdrop-filter: blur(40px) brightness(1.2) !important;
-                box-shadow: 0 60px 150px -30px rgba(0, 0, 0, 0.9) !important;
-                max-width: 850px !important;
-                margin: 100px auto !important;
+                box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.9) !important;
+                max-width: 500px !important;
+                margin: 40px auto !important;
                 text-align: center;
                 position: relative;
                 overflow: hidden;
@@ -79,23 +79,24 @@ else:
                 pointer-events: none;
             }
             
-            /* Título "HERO" com Bricolage Grotesque */
+            /* Título "HERO" Equilibrado */
             .login-title {
                 font-family: 'Bricolage Grotesque', sans-serif !important;
                 color: #FFFFFF !important;
-                font-size: 5.5rem !important;
+                font-size: 3.2rem !important;
                 font-weight: 800 !important;
-                margin-bottom: 10px !important;
-                letter-spacing: -4px !important;
-                line-height: 0.9 !important;
+                margin-bottom: 8px !important;
+                letter-spacing: -2px !important;
+                line-height: 1.1 !important;
                 background: linear-gradient(180deg, #FFFFFF 0%, #60A5FA 100%);
                 -webkit-background-clip: text !important;
                 -webkit-text-fill-color: transparent !important;
+                padding-top: 15px !important;
             }
             .login-subtitle {
                 color: #64748b !important;
-                font-size: 1.6rem !important;
-                margin-bottom: 70px !important;
+                font-size: 1.1rem !important;
+                margin-bottom: 50px !important;
                 font-weight: 300 !important;
                 letter-spacing: 0.5px;
             }
@@ -109,12 +110,12 @@ else:
                 max-width: 550px !important;
             }
 
-            /* Inputs com Design Limpo e Moderno */
+            /* Inputs com Design Refinado */
             div[data-testid="stTextInput"] label p {
                 color: #94a3b8 !important;
                 font-weight: 600 !important;
-                font-size: 1.1rem !important;
-                margin-bottom: 12px !important;
+                font-size: 0.95rem !important;
+                margin-bottom: 10px !important;
                 text-transform: uppercase;
                 letter-spacing: 1px;
             }
@@ -122,11 +123,11 @@ else:
                 background-color: rgba(255, 255, 255, 0.03) !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 color: white !important;
-                border-radius: 20px !important;
-                padding: 35px 25px !important;
-                font-size: 1.6rem !important;
+                border-radius: 14px !important;
+                padding: 20px 20px !important;
+                font-size: 1.1rem !important;
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                height: 85px !important;
+                height: 55px !important;
             }
             div[data-testid="stTextInput"] input:focus {
                 border-color: #3b82f6 !important;
@@ -140,15 +141,15 @@ else:
                 color: #02040A !important;
                 font-family: 'Bricolage Grotesque', sans-serif !important;
                 font-weight: 800 !important;
-                font-size: 1.8rem !important;
-                border-radius: 24px !important;
-                padding: 45px !important;
+                font-size: 1.3rem !important;
+                border-radius: 16px !important;
+                padding: 25px !important;
                 border: none !important;
-                margin-top: 40px !important;
+                margin-top: 30px !important;
                 width: 100% !important;
                 text-transform: uppercase;
                 letter-spacing: 2px;
-                box-shadow: 0 20px 60px -10px rgba(255, 255, 255, 0.2);
+                box-shadow: 0 15px 40px -10px rgba(255, 255, 255, 0.2);
                 transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) !important;
                 height: auto !important;
             }

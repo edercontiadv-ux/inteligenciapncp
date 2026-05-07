@@ -76,39 +76,40 @@ else:
                 font-family: 'Inter', sans-serif;
             }
 
-            /* TRANSFORMANDO A COLUNA DO STREAMLIT NO CARD GIGANTE */
+            /* CONTAINER DO CARD - PROPORCIONAL E ELEGANTE */
             [data-testid="stColumn"]:nth-of-type(2) [data-testid="stVerticalBlock"] {
                 background: rgba(255, 255, 255, 0.03) !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                border-radius: 40px !important;
-                padding: 80px 60px !important;
+                border-radius: 32px !important;
+                padding: 60px 45px !important;
                 backdrop-filter: blur(30px) !important;
-                box-shadow: 0 50px 120px -20px rgba(0, 0, 0, 0.8) !important;
-                max-width: 850px !important;
-                margin: 80px auto !important;
+                box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7) !important;
+                max-width: 520px !important;
+                margin: 40px auto !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
             }
             
-            /* Título "HERO" Massivo */
+            /* Título "PREMIUM" Equilibrado */
             .login-title {
                 color: #FFFFFF !important;
-                font-size: 5rem !important;
-                font-weight: 900 !important;
-                margin-bottom: 15px !important;
-                letter-spacing: -3px !important;
+                font-size: 3rem !important;
+                font-weight: 800 !important;
+                margin-bottom: 8px !important;
+                letter-spacing: -1.5px !important;
                 text-align: center !important;
                 width: 100% !important;
                 background: linear-gradient(135deg, #FFFFFF 0%, #3b82f6 100%) !important;
                 -webkit-background-clip: text !important;
                 -webkit-text-fill-color: transparent !important;
-                line-height: 1 !important;
+                line-height: 1.1 !important;
+                padding-top: 10px !important;
             }
             .login-subtitle {
                 color: #94a3b8 !important;
-                font-size: 1.8rem !important;
-                margin-bottom: 60px !important;
+                font-size: 1.1rem !important;
+                margin-bottom: 50px !important;
                 font-weight: 400 !important;
                 text-align: center !important;
                 width: 100% !important;
@@ -120,25 +121,25 @@ else:
                 padding: 0 !important;
                 background: transparent !important;
                 width: 100% !important;
-                max-width: 600px !important;
+                max-width: 420px !important;
             }
 
-            /* Inputs "HERO" - Enormes e Legíveis */
+            /* Inputs Refinados */
             div[data-testid="stTextInput"] label p {
-                color: #f1f5f9 !important;
-                font-weight: 700 !important;
-                font-size: 1.4rem !important;
-                margin-bottom: 12px !important;
+                color: #94a3b8 !important;
+                font-weight: 600 !important;
+                font-size: 1rem !important;
+                margin-bottom: 8px !important;
             }
             div[data-testid="stTextInput"] input {
-                background-color: rgba(255, 255, 255, 0.05) !important;
-                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                background-color: rgba(255, 255, 255, 0.04) !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
                 color: white !important;
-                border-radius: 20px !important;
-                padding: 30px 25px !important;
-                font-size: 1.8rem !important;
+                border-radius: 14px !important;
+                padding: 20px 20px !important;
+                font-size: 1.1rem !important;
                 transition: all 0.3s ease !important;
-                height: 90px !important;
+                height: 55px !important;
             }
             div[data-testid="stTextInput"] input:focus {
                 border-color: #3b82f6 !important;
@@ -146,16 +147,16 @@ else:
                 box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.25) !important;
             }
             
-            /* Botão de Login "GIGANTE" */
+            /* Botão de Login Profissional */
             div[data-testid="stFormSubmitButton"] button {
                 background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
                 color: white !important;
-                font-weight: 900 !important;
-                font-size: 2rem !important;
-                border-radius: 22px !important;
-                padding: 40px !important;
+                font-weight: 700 !important;
+                font-size: 1.2rem !important;
+                border-radius: 14px !important;
+                padding: 25px !important;
                 border: none !important;
-                margin-top: 40px !important;
+                margin-top: 30px !important;
                 width: 100% !important;
                 text-transform: uppercase;
                 letter-spacing: 2px;
