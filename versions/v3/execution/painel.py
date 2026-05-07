@@ -49,6 +49,9 @@ else:
         <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@800&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
         <style>
             #MainMenu, footer, header {visibility: hidden;}
+            .stDeployButton {display:none;}
+            div[data-testid="stStatusWidget"] {display:none;}
+            [data-testid="stDecoration"] {display:none;}
             
             .stApp {
                 background: radial-gradient(circle at 50% 50%, #060B1A 0%, #02040A 100%) !important;

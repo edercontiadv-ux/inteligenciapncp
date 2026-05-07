@@ -69,6 +69,9 @@ else:
         st.markdown("""
         <style>
             #MainMenu, footer, header {visibility: hidden;}
+            .stDeployButton {display:none;}
+            div[data-testid="stStatusWidget"] {display:none;}
+            [data-testid="stDecoration"] {display:none;}
             
             /* Fundo Navy Profissional com Gradiente Dinâmico */
             .stApp {
