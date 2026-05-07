@@ -76,27 +76,27 @@ else:
                 font-family: 'Inter', sans-serif;
             }
 
-            /* CONTAINER DO CARD - COMPACTO E ELEGANTE */
+            /* CONTAINER ESGUIO E ALTO */
             [data-testid="stColumn"]:nth-of-type(2) [data-testid="stVerticalBlock"] {
                 background: rgba(255, 255, 255, 0.03) !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                border-radius: 24px !important;
-                padding: 40px 35px !important;
+                border-radius: 20px !important;
+                padding: 65px 25px !important;
                 backdrop-filter: blur(30px) !important;
                 box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.6) !important;
-                max-width: 400px !important;
-                margin: 30px auto !important;
+                max-width: 320px !important;
+                margin: 40px auto !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
             }
             
-            /* Título Refinado */
+            /* Título com mais respiro vertical */
             .login-title {
                 color: #FFFFFF !important;
                 font-size: 2.2rem !important;
                 font-weight: 800 !important;
-                margin-bottom: 5px !important;
+                margin-bottom: 12px !important;
                 letter-spacing: -1px !important;
                 text-align: center !important;
                 width: 100% !important;
@@ -108,19 +108,19 @@ else:
             .login-subtitle {
                 color: #94a3b8 !important;
                 font-size: 0.9rem !important;
-                margin-bottom: 40px !important;
+                margin-bottom: 55px !important;
                 font-weight: 400 !important;
                 text-align: center !important;
                 width: 100% !important;
             }
             
-            /* Estilização do Form */
+            /* Estilização do Form Ajustado */
             div[data-testid="stForm"] {
                 border: none !important;
                 padding: 0 !important;
                 background: transparent !important;
                 width: 100% !important;
-                max-width: 320px !important;
+                max-width: 280px !important;
             }
 
             /* Inputs Compactos */

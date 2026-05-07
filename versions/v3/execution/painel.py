@@ -55,16 +55,16 @@ else:
                 font-family: 'Outfit', sans-serif;
             }
 
-            /* Container Premium - Glassmorphism Profundo */
+            /* Container Premium - Esguio e Alto */
             [data-testid="stColumn"]:nth-of-type(2) [data-testid="stVerticalBlock"] {
                 background: rgba(255, 255, 255, 0.02) !important;
                 border: 1px solid rgba(255, 255, 255, 0.08) !important;
                 border-radius: 20px !important;
-                padding: 40px 35px !important;
+                padding: 60px 25px !important;
                 backdrop-filter: blur(40px) brightness(1.2) !important;
                 box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.7) !important;
-                max-width: 380px !important;
-                margin: 30px auto !important;
+                max-width: 310px !important;
+                margin: 40px auto !important;
                 text-align: center;
                 position: relative;
                 overflow: hidden;
@@ -79,23 +79,24 @@ else:
                 pointer-events: none;
             }
             
-            /* Título "HERO" Equilibrado */
+            /* Título com respiro vertical */
             .login-title {
                 font-family: 'Bricolage Grotesque', sans-serif !important;
                 color: #FFFFFF !important;
                 font-size: 2.4rem !important;
                 font-weight: 800 !important;
-                margin-bottom: 6px !important;
+                margin-bottom: 12px !important;
                 letter-spacing: -1.5px !important;
                 line-height: 1.1 !important;
                 background: linear-gradient(180deg, #FFFFFF 0%, #60A5FA 100%);
                 -webkit-background-clip: text !important;
                 -webkit-text-fill-color: transparent !important;
+                padding-top: 10px !important;
             }
             .login-subtitle {
                 color: #64748b !important;
                 font-size: 0.9rem !important;
-                margin-bottom: 35px !important;
+                margin-bottom: 45px !important;
                 font-weight: 300 !important;
                 letter-spacing: 0.5px;
             }
