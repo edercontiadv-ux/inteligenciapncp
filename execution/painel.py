@@ -76,40 +76,39 @@ else:
                 font-family: 'Inter', sans-serif;
             }
 
-            /* CONTAINER DO CARD - PROPORCIONAL E ELEGANTE */
+            /* CONTAINER DO CARD - COMPACTO E ELEGANTE */
             [data-testid="stColumn"]:nth-of-type(2) [data-testid="stVerticalBlock"] {
                 background: rgba(255, 255, 255, 0.03) !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                border-radius: 32px !important;
-                padding: 60px 45px !important;
+                border-radius: 24px !important;
+                padding: 40px 35px !important;
                 backdrop-filter: blur(30px) !important;
-                box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7) !important;
-                max-width: 520px !important;
-                margin: 40px auto !important;
+                box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.6) !important;
+                max-width: 400px !important;
+                margin: 30px auto !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
             }
             
-            /* Título "PREMIUM" Equilibrado */
+            /* Título Refinado */
             .login-title {
                 color: #FFFFFF !important;
-                font-size: 3rem !important;
+                font-size: 2.2rem !important;
                 font-weight: 800 !important;
-                margin-bottom: 8px !important;
-                letter-spacing: -1.5px !important;
+                margin-bottom: 5px !important;
+                letter-spacing: -1px !important;
                 text-align: center !important;
                 width: 100% !important;
                 background: linear-gradient(135deg, #FFFFFF 0%, #3b82f6 100%) !important;
                 -webkit-background-clip: text !important;
                 -webkit-text-fill-color: transparent !important;
-                line-height: 1.1 !important;
-                padding-top: 10px !important;
+                line-height: 1.2 !important;
             }
             .login-subtitle {
                 color: #94a3b8 !important;
-                font-size: 1.1rem !important;
-                margin-bottom: 50px !important;
+                font-size: 0.9rem !important;
+                margin-bottom: 40px !important;
                 font-weight: 400 !important;
                 text-align: center !important;
                 width: 100% !important;
@@ -121,25 +120,25 @@ else:
                 padding: 0 !important;
                 background: transparent !important;
                 width: 100% !important;
-                max-width: 420px !important;
+                max-width: 320px !important;
             }
 
-            /* Inputs Refinados */
+            /* Inputs Compactos */
             div[data-testid="stTextInput"] label p {
                 color: #94a3b8 !important;
                 font-weight: 600 !important;
-                font-size: 1rem !important;
-                margin-bottom: 8px !important;
+                font-size: 0.85rem !important;
+                margin-bottom: 6px !important;
             }
             div[data-testid="stTextInput"] input {
                 background-color: rgba(255, 255, 255, 0.04) !important;
                 border: 1px solid rgba(255, 255, 255, 0.15) !important;
                 color: white !important;
-                border-radius: 14px !important;
-                padding: 20px 20px !important;
-                font-size: 1.1rem !important;
+                border-radius: 12px !important;
+                padding: 15px 15px !important;
+                font-size: 1rem !important;
                 transition: all 0.3s ease !important;
-                height: 55px !important;
+                height: 45px !important;
             }
             div[data-testid="stTextInput"] input:focus {
                 border-color: #3b82f6 !important;
@@ -147,19 +146,19 @@ else:
                 box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.25) !important;
             }
             
-            /* Botão de Login Profissional */
+            /* Botão de Login Compacto */
             div[data-testid="stFormSubmitButton"] button {
                 background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
                 color: white !important;
                 font-weight: 700 !important;
-                font-size: 1.2rem !important;
-                border-radius: 14px !important;
-                padding: 25px !important;
+                font-size: 1rem !important;
+                border-radius: 12px !important;
+                padding: 18px !important;
                 border: none !important;
-                margin-top: 30px !important;
+                margin-top: 25px !important;
                 width: 100% !important;
                 text-transform: uppercase;
-                letter-spacing: 2px;
+                letter-spacing: 1px;
                 box-shadow: 0 20px 50px -10px rgba(37, 99, 235, 0.5);
                 transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
                 height: auto !important;

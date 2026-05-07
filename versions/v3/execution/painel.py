@@ -59,12 +59,12 @@ else:
             [data-testid="stColumn"]:nth-of-type(2) [data-testid="stVerticalBlock"] {
                 background: rgba(255, 255, 255, 0.02) !important;
                 border: 1px solid rgba(255, 255, 255, 0.08) !important;
-                border-radius: 30px !important;
-                padding: 60px 45px !important;
+                border-radius: 20px !important;
+                padding: 40px 35px !important;
                 backdrop-filter: blur(40px) brightness(1.2) !important;
-                box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.9) !important;
-                max-width: 500px !important;
-                margin: 40px auto !important;
+                box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.7) !important;
+                max-width: 380px !important;
+                margin: 30px auto !important;
                 text-align: center;
                 position: relative;
                 overflow: hidden;
@@ -83,20 +83,19 @@ else:
             .login-title {
                 font-family: 'Bricolage Grotesque', sans-serif !important;
                 color: #FFFFFF !important;
-                font-size: 3.2rem !important;
+                font-size: 2.4rem !important;
                 font-weight: 800 !important;
-                margin-bottom: 8px !important;
-                letter-spacing: -2px !important;
+                margin-bottom: 6px !important;
+                letter-spacing: -1.5px !important;
                 line-height: 1.1 !important;
                 background: linear-gradient(180deg, #FFFFFF 0%, #60A5FA 100%);
                 -webkit-background-clip: text !important;
                 -webkit-text-fill-color: transparent !important;
-                padding-top: 15px !important;
             }
             .login-subtitle {
                 color: #64748b !important;
-                font-size: 1.1rem !important;
-                margin-bottom: 50px !important;
+                font-size: 0.9rem !important;
+                margin-bottom: 35px !important;
                 font-weight: 300 !important;
                 letter-spacing: 0.5px;
             }
@@ -114,8 +113,8 @@ else:
             div[data-testid="stTextInput"] label p {
                 color: #94a3b8 !important;
                 font-weight: 600 !important;
-                font-size: 0.95rem !important;
-                margin-bottom: 10px !important;
+                font-size: 0.85rem !important;
+                margin-bottom: 8px !important;
                 text-transform: uppercase;
                 letter-spacing: 1px;
             }
@@ -123,11 +122,11 @@ else:
                 background-color: rgba(255, 255, 255, 0.03) !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 color: white !important;
-                border-radius: 14px !important;
-                padding: 20px 20px !important;
-                font-size: 1.1rem !important;
+                border-radius: 12px !important;
+                padding: 15px 15px !important;
+                font-size: 1rem !important;
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                height: 55px !important;
+                height: 45px !important;
             }
             div[data-testid="stTextInput"] input:focus {
                 border-color: #3b82f6 !important;
@@ -141,15 +140,15 @@ else:
                 color: #02040A !important;
                 font-family: 'Bricolage Grotesque', sans-serif !important;
                 font-weight: 800 !important;
-                font-size: 1.3rem !important;
-                border-radius: 16px !important;
-                padding: 25px !important;
+                font-size: 1rem !important;
+                border-radius: 12px !important;
+                padding: 18px !important;
                 border: none !important;
-                margin-top: 30px !important;
+                margin-top: 25px !important;
                 width: 100% !important;
                 text-transform: uppercase;
-                letter-spacing: 2px;
-                box-shadow: 0 15px 40px -10px rgba(255, 255, 255, 0.2);
+                letter-spacing: 1px;
+                box-shadow: 0 10px 30px -10px rgba(255, 255, 255, 0.2);
                 transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) !important;
                 height: auto !important;
             }
