@@ -70,84 +70,123 @@ else:
         <style>
             #MainMenu, footer, header {visibility: hidden;}
             
-            /* Fundo Navy Profissional */
+            /* Fundo Navy Profissional com Gradiente Dinâmico */
             .stApp {
-                background: linear-gradient(135deg, #030D1A 0%, #061530 100%) !important;
+                background: radial-gradient(circle at 50% 50%, #0A192F 0%, #020817 100%) !important;
                 font-family: 'Inter', sans-serif;
             }
             
-            /* Container do Card - Responsivo */
+            /* Container do Card - Maior e mais Elegante */
             .login-card {
-                background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 20px;
-                padding: 50px;
-                backdrop-filter: blur(15px);
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-                margin-top: 50px;
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                border-radius: 28px;
+                padding: 60px 50px;
+                backdrop-filter: blur(25px);
+                box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
                 width: 100%;
-                max-width: 550px;
-                margin-left: auto;
-                margin-right: auto;
+                max-width: 650px;
+                margin: 60px auto;
+                text-align: center;
             }
             
-            /* Textos */
+            /* Textos Ampliados */
             .login-title {
                 color: #FFFFFF;
-                font-size: 2.5rem;
-                font-weight: 800;
-                text-align: center;
-                margin-bottom: 10px;
-                letter-spacing: -1px;
+                font-size: 3.2rem;
+                font-weight: 900;
+                margin-bottom: 8px;
+                letter-spacing: -2px;
+                background: linear-gradient(135deg, #FFFFFF 0%, #7BA7D4 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
             }
             .login-subtitle {
-                color: #7BA7D4;
-                font-size: 1.1rem;
-                text-align: center;
-                margin-bottom: 40px;
+                color: #94a3b8;
+                font-size: 1.25rem;
+                margin-bottom: 50px;
+                font-weight: 400;
             }
             
-            /* Inputs Nativo Custom */
+            /* Estilização do Form para forçar largura */
+            div[data-testid="stForm"] {
+                border: none !important;
+                padding: 0 !important;
+                background: transparent !important;
+                width: 100% !important;
+                max-width: 500px !important;
+                margin: 0 auto !important;
+            }
+
+            /* Inputs Nativo Custom - Maiores e mais Robustos */
             div[data-testid="stTextInput"] label p {
-                color: #FFFFFF !important;
-                font-weight: 500 !important;
-                font-size: 0.95rem !important;
+                color: #cbd5e1 !important;
+                font-weight: 600 !important;
+                font-size: 1rem !important;
+                margin-bottom: 10px !important;
             }
             div[data-testid="stTextInput"] input {
-                background-color: rgba(255, 255, 255, 0.07) !important;
-                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                background-color: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
                 color: white !important;
-                border-radius: 12px !important;
-                padding: 14px !important;
-                font-size: 1.1rem !important;
-            }
-            
-            /* Botão de Login */
-            .stButton > button {
-                background: #2563EB !important;
-                color: white !important;
-                font-weight: 700 !important;
+                border-radius: 16px !important;
+                padding: 20px 18px !important;
                 font-size: 1.2rem !important;
-                border-radius: 12px !important;
-                padding: 15px !important;
-                border: none !important;
-                margin-top: 20px;
-                width: 100% !important;
-                box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
-                transition: all 0.3s ease;
+                transition: all 0.3s ease !important;
+                height: 60px !important;
             }
-            .stButton > button:hover {
-                background: #1D4ED8 !important;
-                transform: translateY(-2px);
-                box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.5);
+            div[data-testid="stTextInput"] input:focus {
+                border-color: #3b82f6 !important;
+                background-color: rgba(255, 255, 255, 0.08) !important;
+                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
             }
             
+            /* Botão de Login - Impactante */
+            div[data-testid="stFormSubmitButton"] button {
+                background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+                color: white !important;
+                font-weight: 800 !important;
+                font-size: 1.3rem !important;
+                border-radius: 16px !important;
+                padding: 28px !important;
+                border: none !important;
+                margin-top: 30px !important;
+                width: 100% !important;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.4);
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+                height: auto !important;
+            }
+            div[data-testid="stFormSubmitButton"] button:hover {
+                transform: translateY(-4px) scale(1.02);
+                box-shadow: 0 25px 40px -10px rgba(37, 99, 235, 0.5);
+                filter: brightness(1.1);
+            }
+            
+            /* Links de Ajuda */
+            .login-footer-links {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 15px;
+                margin-bottom: 25px;
+            }
+            .login-footer-links a, .login-footer-links span {
+                color: #64748b;
+                font-size: 1rem;
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+            .login-footer-links a:hover {
+                color: #3b82f6;
+            }
+
             /* Grid de Fundo */
             .bg-overlay {
                 position: fixed;
                 top: 0; left: 0; width: 100%; height: 100%;
-                background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-                background-size: 40px 40px;
+                background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.03) 1px, transparent 0);
+                background-size: 50px 50px;
                 z-index: -1;
             }
         </style>
@@ -155,7 +194,7 @@ else:
         """, unsafe_allow_html=True)
         
         # Centralização usando colunas nativas
-        _, col_login, _ = st.columns([0.5, 2, 0.5])
+        _, col_login, _ = st.columns([0.3, 2.4, 0.3])
         
         with col_login:
             st.markdown('<div class="login-card">', unsafe_allow_html=True)
@@ -169,9 +208,9 @@ else:
                 senha = st.text_input("Senha", type="password", placeholder="••••••••")
                 
                 st.markdown("""
-                <div style="display: flex; justify-content: space-between; margin-top: -10px; margin-bottom: 20px;">
-                    <span style="color: #7BA7D4; font-size: 0.9rem;">Lembrar de mim</span>
-                    <a href="#" style="color: #2563EB; font-size: 0.9rem; text-decoration: none;">Esqueci a senha</a>
+                <div class="login-footer-links">
+                    <span><input type="checkbox" id="remember" style="margin-right: 8px;">Lembrar de mim</span>
+                    <a href="#">Esqueci a senha</a>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -194,14 +233,12 @@ else:
                                 st.error("Erro de conexão.")
             
             st.markdown("""
-            <p style="text-align: center; color: #7BA7D4; margin-top: 30px; font-size: 0.9rem;">
-                Dificuldades no acesso? <a href="#" style="color: #2563EB; text-decoration: none;">Suporte Técnico</a>
+            <p style="text-align: center; color: #64748b; margin-top: 40px; font-size: 1rem; font-weight: 500;">
+                Dificuldades no acesso? <a href="#" style="color: #2563EB; text-decoration: none; font-weight: 600;">Suporte Técnico</a>
             </p>
             """, unsafe_allow_html=True)
             
             st.markdown('</div>', unsafe_allow_html=True)
-        st.stop()
-        st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
 
     # Se chegou aqui, o usuário está logado.
