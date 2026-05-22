@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Work+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Nunito:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&family=DM+Sans:opsz,wght@9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Prata&family=Lato:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&family=Open+Sans:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Proza+Libre:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Chivo:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-navy: 10, 31, 63;
+    --brand-gold: 200, 150, 62;
+    --brand-forest: 27, 107, 74;
+    --brand-cream: 247, 245, 240;
+    --brand-ink: 26, 26, 46;
+    --brand-sand: 232, 224, 212;
+    --brand-mist: 226, 232, 240;
+    --font-heading: "DM Serif Display", Georgia, serif;
+    --font-body: Outfit, system-ui, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-body text-brand-ink antialiased bg-brand-cream;
+  }
+
+  ::selection {
+    @apply bg-brand-gold/30 text-brand-navy;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-lg border border-brand-sand/40 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .chip {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center px-5 py-2.5 rounded-lg font-body font-medium text-sm
+           bg-brand-navy text-white
+           hover:bg-brand-navy/90
+           focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed
+           transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center px-5 py-2.5 rounded-lg font-body font-medium text-sm
+           bg-brand-gold text-white
+           hover:bg-brand-gold/90
+           focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed
+           transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border border-brand-sand/60 bg-white px-4 py-2.5
+           font-body text-sm text-brand-ink placeholder:text-brand-sand
+           focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold
+           transition-all duration-200;
+  }
+
+  .select-field {
+    @apply rounded-lg border border-brand-sand/60 bg-white px-3 py-1.5
+           font-body text-sm text-brand-ink
+           focus:outline-none focus:ring-2 focus:ring-brand-gold/30 focus:border-brand-gold
+           transition-all duration-200;
+  }
+
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  .stagger-6 { animation-delay: 0.6s; }
+  .stagger-7 { animation-delay: 0.7s; }
+  .stagger-8 { animation-delay: 0.8s; }
+}
