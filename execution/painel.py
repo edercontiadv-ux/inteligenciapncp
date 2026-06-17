@@ -362,230 +362,300 @@ else:
 
         /* ── Contador ── */
         .results-count {
-            text-align: center;
-            color: #94a3b8;
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1.5px solid #cbd5e1;
+            background: #fff;
+            color: #334155 !important;
             font-size: 0.78rem;
-            margin-bottom: 12px;
-            padding: 5px;
-            border-bottom: 0.5px solid #e2e8f0;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .btn-report:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* ══════════════════════════════════════
+           CONTADOR DE RESULTADOS
+        ══════════════════════════════════════ */
+        .results-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+            padding: 10px 16px;
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            font-family: 'Inter', sans-serif;
         }
         .results-count span {
             color: #0f172a;
-            font-weight: 500;
+            font-weight: 700;
         }
 
-        /* ── Grid de cards ── */
+        /* ══════════════════════════════════════
+           GRID E CARDS - PADRÃO PREMIUM
+        ══════════════════════════════════════ */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
+            gap: 16px;
         }
-
-        /* ── Card ── */
         .result-card {
-            background: #fff;
-            border: 0.5px solid #e2e8f0;
-            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid #e8edf5;
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+            border-color: rgba(59,130,246,0.2);
         }
         .card-scroll {
             overflow-y: auto;
             max-height: 340px;
-            padding: 14px 14px 0;
+            padding: 16px 16px 0;
         }
         .card-scroll::-webkit-scrollbar { width: 3px; }
         .card-scroll::-webkit-scrollbar-track { background: transparent; }
-        .card-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+        .card-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 10px;
-            gap: 6px;
+            margin-bottom: 12px;
+            gap: 8px;
         }
         .card-id-lbl {
-            font-size: 0.62rem;
-            font-weight: 500;
+            font-size: 0.6rem;
+            font-weight: 700;
             color: #94a3b8;
-            letter-spacing: 0.07em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            margin-bottom: 1px;
+            margin-bottom: 3px;
+            font-family: 'Outfit', sans-serif;
         }
         .card-title {
             color: #0f172a;
-            font-size: 0.82rem;
-            font-weight: 500;
-            line-height: 1.4;
+            font-size: 0.83rem;
+            font-weight: 600;
+            line-height: 1.45;
+            font-family: 'Inter', sans-serif;
         }
-        
+
+        /* Badges premium com ponto pulsante */
         .badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             background: #f0fdf4;
             color: #15803d;
-            border: 0.5px solid #bbf7d0;
-            padding: 3px 8px;
+            border: 1px solid #bbf7d0;
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.62rem;
-            font-weight: 500;
+            font-weight: 700;
             white-space: nowrap;
             flex-shrink: 0;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.04em;
         }
-        .badge-dot { width: 4px; height: 4px; border-radius: 50%; background: #15803d; display: inline-block; flex-shrink: 0; }
-        
-        /* Cores Dinâmicas do Badge */
+        .badge-dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: #15803d;
+            display: inline-block;
+            flex-shrink: 0;
+        }
         .badge.warn { background: #fffbeb; color: #b45309; border-color: #fde68a; }
-        .badge.warn .badge-dot { background: #b45309; }
-        .badge.danger { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
-        .badge.danger .badge-dot { background: #b91c1c; }
+        .badge.warn .badge-dot { background: #f59e0b; }
+        .badge.danger { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+        .badge.danger .badge-dot { background: #f43f5e; }
 
         .card-meta-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-bottom: 8px;
-        }
-        .meta-key {
-            font-size: 0.62rem;
-            font-weight: 500;
-            color: #94a3b8;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            display: block;
-            margin-bottom: 1px;
-        }
-        .meta-val {
-            font-size: 0.72rem;
-            color: #1e293b;
-            line-height: 1.3;
-        }
-        .card-object {
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 7px;
-            padding: 7px 10px;
-            font-size: 0.72rem;
-            color: #334155;
-            line-height: 1.5;
+            gap: 8px;
             margin-bottom: 10px;
         }
+        .meta-key {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .meta-val {
+            font-size: 0.74rem;
+            color: #1e293b;
+            font-weight: 500;
+            line-height: 1.35;
+        }
+        .card-object {
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid #e2e8f0;
+            padding: 8px 12px;
+            font-size: 0.73rem;
+            color: #475569;
+            line-height: 1.55;
+            margin-bottom: 12px;
+            font-style: italic;
+        }
 
-        /* ── Tabela de itens ── */
+        /* Tabela de itens refinada */
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 4px 0 10px;
-            font-size: 0.68rem;
+            margin: 4px 0 12px;
+            font-size: 0.69rem;
             table-layout: fixed;
         }
         .items-table thead th {
-            background: rgba(255, 255, 255, 0.4);
-            color: #94a3b8;
-            padding: 6px 8px;
+            background: #f8fafc;
+            color: #64748b;
+            padding: 7px 8px;
             text-align: left;
-            font-weight: 500;
+            font-weight: 700;
             text-transform: uppercase;
-            font-size: 0.6rem;
-            letter-spacing: 0.06em;
-            border-bottom: 0.5px solid #e2e8f0;
+            font-size: 0.59rem;
+            letter-spacing: 0.09em;
+            border-bottom: 1px solid #e2e8f0;
+            font-family: 'Outfit', sans-serif;
         }
         .items-table tbody td {
             padding: 7px 8px;
             color: #334155;
-            border-bottom: 0.5px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .items-table tbody tr:last-child td {
-            border-bottom: none;
-        }
+        .items-table tbody tr:last-child td { border-bottom: none; }
+        .items-table tbody tr:hover td { background: #f8fafc; }
         .unit-pill {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 1px 5px;
-            border-radius: 3px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 2px 6px;
+            border-radius: 4px;
             font-size: 0.62rem;
-            font-weight: 500;
+            font-weight: 700;
+            border: 1px solid #bfdbfe;
         }
 
-        /* ── Rodapé do card ── */
+        /* Rodapé do card premium */
         .card-footer {
-            border-top: 0.5px solid #f1f5f9;
-            padding: 10px 14px;
-            background: #fff;
+            border-top: 1px solid #f1f5f9;
+            padding: 12px 16px;
+            background: #fafbfc;
             flex-shrink: 0;
             margin-top: auto;
         }
         .price-lbl {
-            font-size: 0.62rem;
-            font-weight: 500;
+            font-size: 0.6rem;
+            font-weight: 700;
             color: #94a3b8;
-            letter-spacing: 0.07em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
+            font-family: 'Outfit', sans-serif;
         }
         .price-val {
-            font-size: 1.05rem;
-            font-weight: 500;
+            font-size: 1.2rem;
+            font-weight: 800;
             color: #0f172a;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
+            font-family: 'Outfit', sans-serif;
         }
         .price-sub {
             font-size: 0.65rem;
             color: #94a3b8;
-            margin-top: 1px;
-            margin-bottom: 8px;
-            min-height: 12px;
+            margin-top: 2px;
+            margin-bottom: 10px;
+            min-height: 14px;
         }
-        .btn-group {
-            display: flex;
-            gap: 6px;
-        }
+        .btn-group { display: flex; gap: 8px; }
         .btn-ghost {
             flex: 1;
-            padding: 6px 0;
-            border-radius: 7px;
-            border: 0.5px solid #cbd5e1;
-            background: transparent;
-            color: #334155 !important;
+            padding: 7px 0;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: #fff;
+            color: #475569 !important;
             font-size: 0.72rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             text-align: center;
             text-decoration: none;
             font-family: 'Inter', sans-serif;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
-        .btn-ghost:hover { background: #f8fafc; }
-        
+        .btn-ghost:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #0f172a !important;
+        }
         .btn-solid {
             flex: 1;
-            padding: 6px 0;
-            border-radius: 7px;
+            padding: 7px 0;
+            border-radius: 8px;
             border: none;
-            background: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
             color: #fff !important;
             font-size: 0.72rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             text-align: center;
             text-decoration: none;
             font-family: 'Inter', sans-serif;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
-        .btn-solid:hover { background: #1e293b; }
+        .btn-solid:hover {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+        }
     </style>
     """, unsafe_allow_html=True)
 
-    # ─── Hero ───
-    st.markdown("""
-    <div class="hero">
-        <h1>Inteligência PNCP</h1>
-        <p>Busque atas e contratos dos últimos 10 meses no Portal Nacional de Contratações Públicas</p>
+    # ─── Hero Header Premium ───
+    import datetime as dt
+    hora_atual = dt.datetime.now().hour
+    saudacao = "Bom dia" if hora_atual < 12 else ("Boa tarde" if hora_atual < 18 else "Boa noite")
+
+    st.markdown(f"""
+    <div class="top-header">
+        <div class="top-header-left">
+            <h1>🏛️ Inteligência PNCP</h1>
+            <p>{saudacao}! Pesquise atas e contratos dos últimos 10 meses no Portal Nacional de Contratações Públicas.</p>
+        </div>
+        <div class="top-header-badge">
+            <span class="pulse-dot"></span> Sistema online
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
