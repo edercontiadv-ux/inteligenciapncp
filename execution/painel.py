@@ -609,15 +609,30 @@ else:
     elif item and not quantidade.strip():
         st.warning("⚠️ O preenchimento da **Quantidade** é obrigatório para aplicarmos o filtro rigoroso de **Economia de Escala** (limite de 20% para cima ou para baixo).")
     elif item and quantidade.strip():
-        with st.spinner("🔄 Conectando à API do Governo Federal e enriquecendo dados..."):
-            dados = buscar_atas_contratos(
-                item,
-                quantidade=quantidade,
-                unidade_medida=unidade,
-                limit=30,
+        # Wrapper de cache com hash ignorando o callback
+        @st.cache_data(ttl=43200, show_spinner=False)
+        def buscar_com_cache(i, q, u, l, _callback):
+            return buscar_atas_contratos(
+                i,
+                quantidade=q,
+                unidade_medida=u,
+                limit=l,
+                progress_callback=_callback
             )
-            
-            resultados_brutos = dados.get("resultados", [])
+
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+
+        def atualizar_progresso(percentual, mensagem):
+            progress_bar.progress(percentual)
+            status_text.markdown(f"*{mensagem}*")
+
+        dados = buscar_com_cache(item, quantidade, unidade, 30, atualizar_progresso)
+        
+        progress_bar.empty()
+        status_text.empty()
+        
+        resultados_brutos = dados.get("resultados", [])
 
         if not resultados_brutos:
             st.info("Nenhum contrato encontrado para este item nos últimos 10 meses.")
@@ -646,13 +661,37 @@ else:
                 def fmt0(v):
                     return f"R$ {v:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-                # Atualizar métricas para o PDF
+                # Atualizar métricas para o PDF e pegar outliers
+                outliers = dados.get("metricas", {}).get("outliers_removidos", 0)
                 metricas = {"minimo": menor, "maximo": maior, "media": media, "mediana": mediana, "total_encontrado": n}
                 
                 # Botão relatório
                 pdffile = gerar_pdf_pesquisa(item, resultados, metricas, {"Quantidade": quantidade, "Unidade": unidade})
                 nome_relatorio = f"relatorio_pesquisa_{item.replace(' ', '_')}.pdf"
                 b64_relatorio = base64.b64encode(bytes(pdffile)).decode('utf-8')
+
+                # Exportar para Excel
+                import io
+                import pandas as pd
+                df_excel = pd.DataFrame([{
+                    "Contrato": r["titulo"],
+                    "Órgão": r["orgao"],
+                    "Local": f"{r.get('municipio', '')}/{r.get('uf', '')}".strip("/"),
+                    "Data": r["data_publicacao"],
+                    "Valor Unitário (R$)": r["valor"],
+                    "Link PNCP": r["link_portal"],
+                    "Link Arquivo": r["link_pdf"]
+                } for r in resultados])
+                
+                excel_buffer = io.BytesIO()
+                with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                    df_excel.to_excel(writer, index=False, sheet_name='Pesquisa PNCP')
+                excel_data = excel_buffer.getvalue()
+                b64_excel = base64.b64encode(excel_data).decode('utf-8')
+                nome_excel = f"relatorio_pesquisa_{item.replace(' ', '_')}.xlsx"
+
+                if outliers > 0:
+                    st.info(f"🛡️ **Filtro Inteligente:** {outliers} valores atípicos (outliers) foram descartados automaticamente pelo sistema para garantir a precisão legal da média e da mediana.")
 
                 st.markdown(f"""
                 <div class="section-lbl">Resumo da pesquisa</div>
@@ -678,9 +717,14 @@ else:
                     <div class="stat-sub">Teto esperado</div>
                 </div>
                 </div>
-                <a href="data:application/pdf;base64,{b64_relatorio}" download="{nome_relatorio}" class="btn-report">
-                    📄 Baixar relatório de pesquisa (capa)
-                </a>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <a href="data:application/pdf;base64,{b64_relatorio}" download="{nome_relatorio}" class="btn-report" style="margin:0;">
+                        📄 Baixar relatório (PDF)
+                    </a>
+                    <a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64_excel}" download="{nome_excel}" class="btn-report" style="margin:0; background: #f0fdf4; border-color: #bbf7d0; color: #15803d !important;">
+                        📊 Exportar para Excel
+                    </a>
+                </div>
                 """, unsafe_allow_html=True)
 
             # ── Histogram na Sidebar ──

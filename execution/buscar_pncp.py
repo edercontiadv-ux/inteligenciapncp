@@ -5,10 +5,18 @@ import re
 import unicodedata
 import difflib
 from dateutil.relativedelta import relativedelta
+import numpy as np
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10), reraise=True)
+def fetch_json(url, params=None):
+    res = requests.get(url, headers=HEADERS, params=params, timeout=15)
+    res.raise_for_status()
+    return res.json()
 
 def remove_accents(input_str):
     if not isinstance(input_str, str):
@@ -58,14 +66,12 @@ def _buscar_arquivos_contrato(cnpj: str, ano: str, seq: str):
     """
     url = f"https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/contratos/{ano}/{seq}/arquivos"
     try:
-        res = requests.get(url, headers=HEADERS, timeout=10)
-        if res.status_code == 200:
-            arquivos = res.json()
-            if arquivos:
-                arquivo = arquivos[0]
-                pdf_url = arquivo.get("url", "")
-                pdf_titulo = arquivo.get("titulo", "")  # ex: "CONTRATO 180 25.pdf"
-                return pdf_url, pdf_titulo
+        arquivos = fetch_json(url)
+        if arquivos:
+            arquivo = arquivos[0]
+            pdf_url = arquivo.get("url", "")
+            pdf_titulo = arquivo.get("titulo", "")  # ex: "CONTRATO 180 25.pdf"
+            return pdf_url, pdf_titulo
     except Exception:
         pass
     return "", ""
@@ -80,12 +86,10 @@ def _buscar_valor_homologado(cnpj, ano, seq, numero_item, valor_estimado):
         return valor_estimado
     url = f"https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens/{numero_item}/resultados"
     try:
-        res = requests.get(url, headers=HEADERS, timeout=10)
-        if res.status_code == 200:
-            resultados = res.json()
-            if resultados:
-                # Geralmente o primeiro resultado é o vencedor/homologado
-                return resultados[0].get("valorUnitarioHomologado", valor_estimado)
+        resultados = fetch_json(url)
+        if resultados:
+            # Geralmente o primeiro resultado é o vencedor/homologado
+            return resultados[0].get("valorUnitarioHomologado", valor_estimado)
     except Exception:
         pass
     return valor_estimado
@@ -110,30 +114,27 @@ def _buscar_itens_compra(numero_controle_compra: str):
 
     url = f"https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens"
     try:
-        res = requests.get(url, headers=HEADERS, timeout=10)
-        if res.status_code == 200:
-            dados = res.json()
-            itens = []
-            for item in dados:
-                itens.append({
-                    "numero_item": item.get("numeroItem"),
-                    "descricao": item.get("descricao", ""),
-                    "quantidade": item.get("quantidade", 0),
-                    "unidade_medida": item.get("unidadeMedida", "N/I"),
-                    "valor_unitario": item.get("valorUnitarioEstimado", 0),
-                    "valor_total": item.get("valorTotal", 0),
-                    # Guardamos dados da compra para buscar o homologado depois se o item for filtrado
-                    "compra_cnpj": cnpj,
-                    "compra_ano": ano,
-                    "compra_seq": seq
-                })
-            return itens
+        dados = fetch_json(url)
+        itens = []
+        for item in dados:
+            itens.append({
+                "numero_item": item.get("numeroItem"),
+                "descricao": item.get("descricao", ""),
+                "quantidade": item.get("quantidade", 0),
+                "unidade_medida": item.get("unidadeMedida", "N/I"),
+                "valor_unitario": item.get("valorUnitarioEstimado", 0),
+                "valor_total": item.get("valorTotal", 0),
+                "compra_cnpj": cnpj,
+                "compra_ano": ano,
+                "compra_seq": seq
+            })
+        return itens
     except Exception:
         pass
     return []
 
 
-def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str = None, limit: int = 5):
+def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str = None, limit: int = 5, progress_callback=None):
     """
     Busca os contratos/atas mais recentes no PNCP relacionados ao item,
     limitando-se aos últimos 10 meses.
@@ -143,6 +144,7 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
         quantidade: Quantidade aproximada desejada (texto).
         unidade_medida: Unidade de medida desejada (ex: 'km', 'm²', 'un').
         limit: Número máximo de resultados a retornar.
+        progress_callback: Função opcional para reportar progresso visual na UI.
 
     Returns:
         Lista de dicionários com os dados dos contratos encontrados.
@@ -179,6 +181,9 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
         api_query = " ".join(search_terms_api[:3]) if search_terms_api else item
 
         while pagina_atual <= max_paginas and len(resultados) < limit:
+            if progress_callback:
+                progress_callback(min(int((len(resultados) / limit) * 50) + 10, 60), f"Buscando no PNCP (Página {pagina_atual})...")
+                
             params = {
                 "q": api_query,
                 "tipos_documento": "contrato",
@@ -186,9 +191,10 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
                 "pagina": pagina_atual
             }
 
-            response = requests.get(base_url, params=params, headers=HEADERS, timeout=15)
-            response.raise_for_status()
-            data = response.json()
+            try:
+                data = fetch_json(base_url, params=params)
+            except Exception as e:
+                break
 
             items = data.get("items", [])
             if not items:
@@ -229,10 +235,8 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
                 if cnpj:
                     try:
                         url_detalhe = f"https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/contratos/{ano}/{seq}"
-                        res_detalhe = requests.get(url_detalhe, headers=HEADERS, timeout=10)
-                        if res_detalhe.status_code == 200:
-                            detalhe = res_detalhe.json()
-                            numero_compra_full = detalhe.get("numeroControlePncpCompra", "")
+                        detalhe = fetch_json(url_detalhe)
+                        numero_compra_full = detalhe.get("numeroControlePncpCompra", "")
                     except Exception:
                         pass
 
@@ -334,9 +338,25 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
             # Avançar página
             pagina_atual += 1
 
-        # Calcular Métricas
-        precos = [r["valor"] for r in resultados if r["valor"] > 0]
+        if progress_callback:
+            progress_callback(90, "Processando dados e removendo valores atípicos (outliers)...")
+
+        # Calcular Métricas com Filtro de Outliers (IQR)
+        precos_brutos = [r["valor"] for r in resultados if r["valor"] > 0]
+        precos = precos_brutos
         
+        # Filtro de Outliers IQR
+        if len(precos_brutos) >= 4:
+            q1 = np.percentile(precos_brutos, 25)
+            q3 = np.percentile(precos_brutos, 75)
+            iqr = q3 - q1
+            lower_bound = q1 - 1.5 * iqr
+            upper_bound = q3 + 1.5 * iqr
+            precos = [p for p in precos_brutos if lower_bound <= p <= upper_bound]
+            
+            # Atualiza a lista de resultados para refletir apenas os válidos nas estatísticas
+            # (No app real, poderíamos manter todos e apenas flagar, mas remover garante média limpa)
+            
         media = 0
         minimo = 0
         maximo = 0
@@ -366,8 +386,12 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
             "maximo": maximo,
             "mediana": mediana,
             "desvio_padrao": desvio_padrao,
-            "total_encontrado": len(precos)
+            "total_encontrado": len(precos),
+            "outliers_removidos": len(precos_brutos) - len(precos)
         }
+
+        if progress_callback:
+            progress_callback(100, "Concluído!")
 
         return {
             "resultados": resultados,
