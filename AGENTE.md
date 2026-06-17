@@ -38,6 +38,11 @@ Before writing a script, check `execution/` per your directive. Only create new 
 **3. Update directives as you learn**
 Directives are living documents. When you discover API constraints, better approaches, common errors, or timing expectations—update the directive. But don't create or overwrite directives without asking unless explicitly told to. Directives are your instruction set and must be preserved (and improved upon over time, not extemporaneously used and then discarded).
 
+**4. Continuous Deployment Rule**
+Sempre que forem feitas alterações no projeto, você (o Agente) DEVERÁ automaticamente:
+1. Fazer o `git add .`, `git commit -m "..."` e `git push` para o repositório no Github.
+2. Executar o deploy no Cloud Run / Firebase (via CLI). Se os comandos não estiverem acessíveis pelo seu terminal, instrua o usuário a executá-los, mas a sua responsabilidade primária é tentar automatizar esse processo sempre que alterar código.
+
 ## Self-annealing loop
 
 Errors are learning opportunities. When something breaks:

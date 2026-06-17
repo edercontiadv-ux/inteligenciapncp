@@ -1,9 +1,14 @@
 import requests
 import datetime
 import math
+import re
 import unicodedata
 import difflib
 from dateutil.relativedelta import relativedelta
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
 
 def remove_accents(input_str):
     if not isinstance(input_str, str):
@@ -53,7 +58,7 @@ def _buscar_arquivos_contrato(cnpj: str, ano: str, seq: str):
     """
     url = f"https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/contratos/{ano}/{seq}/arquivos"
     try:
-        res = requests.get(url, timeout=10)
+        res = requests.get(url, headers=HEADERS, timeout=10)
         if res.status_code == 200:
             arquivos = res.json()
             if arquivos:
@@ -71,9 +76,11 @@ def _buscar_valor_homologado(cnpj, ano, seq, numero_item, valor_estimado):
     Busca o valor homologado (final) de um item específico.
     Se não encontrar ou der erro, retorna o valor estimado original.
     """
+    if not numero_item:
+        return valor_estimado
     url = f"https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens/{numero_item}/resultados"
     try:
-        res = requests.get(url, timeout=10)
+        res = requests.get(url, headers=HEADERS, timeout=10)
         if res.status_code == 200:
             resultados = res.json()
             if resultados:
@@ -103,7 +110,7 @@ def _buscar_itens_compra(numero_controle_compra: str):
 
     url = f"https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/compras/{ano}/{seq}/itens"
     try:
-        res = requests.get(url, timeout=10)
+        res = requests.get(url, headers=HEADERS, timeout=10)
         if res.status_code == 200:
             dados = res.json()
             itens = []
@@ -146,13 +153,9 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
     hoje = datetime.date.today()
     dez_meses_atras = hoje - relativedelta(months=10)
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-    }
-
     resultados = []
     pagina_atual = 1
-    max_paginas = 10  # Aumentado para 10 páginas devido ao filtro rígido de escala
+    max_paginas = 20  # Aumentar para capturar mais resultados
 
     # Parse da quantidade alvo
     qtd_alvo = None
@@ -163,15 +166,27 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
             pass
 
     try:
+        # Limpar pontuação do item e extrair termos relevantes para a query da API
+        item_clean = re.sub(r'[^\w\s]', ' ', item)
+        search_terms_api = [
+            t for t in remove_accents(item_clean.lower()).split()
+            if len(t) > 1 and t not in {'aquisicao', 'fornecimento', 'prestacao', 'servico', 'compra', 'contratacao',
+                                         'item', 'peca', 'pecas', 'material', 'para', 'com', 'pelo', 'pela',
+                                         'de', 'da', 'do', 'em', 'no', 'na', 'ao', 'os', 'as', 'um', 'uma'}
+            and not t.replace('.', '').replace(',', '').isdigit()
+        ]
+        # Query com os 3 primeiros termos (incluindo 'a4' se presente)
+        api_query = " ".join(search_terms_api[:3]) if search_terms_api else item
+
         while pagina_atual <= max_paginas and len(resultados) < limit:
             params = {
-                "q": item,
+                "q": api_query,
                 "tipos_documento": "contrato",
                 "tam_pagina": 100,
                 "pagina": pagina_atual
             }
 
-            response = requests.get(base_url, params=params, headers=headers, timeout=15)
+            response = requests.get(base_url, params=params, headers=HEADERS, timeout=15)
             response.raise_for_status()
             data = response.json()
 
@@ -214,7 +229,7 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
                 if cnpj:
                     try:
                         url_detalhe = f"https://pncp.gov.br/api/pncp/v1/orgaos/{cnpj}/contratos/{ano}/{seq}"
-                        res_detalhe = requests.get(url_detalhe, timeout=10)
+                        res_detalhe = requests.get(url_detalhe, headers=HEADERS, timeout=10)
                         if res_detalhe.status_code == 200:
                             detalhe = res_detalhe.json()
                             numero_compra_full = detalhe.get("numeroControlePncpCompra", "")
@@ -223,16 +238,36 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
 
                 itens_detalhados = _buscar_itens_compra(numero_compra_full)
 
-                # Filtrar termos de busca
+                # Fallback: se não achou itens da compra, usar dados do próprio contrato
+                if not itens_detalhados:
+                    valor_global = doc.get("valor_global") or 0
+                    itens_detalhados = [{
+                        "descricao": doc.get("description", ""),
+                        "quantidade": 1,
+                        "unidade_medida": "un",
+                        "valor_unitario": valor_global,
+                        "valor_total": valor_global,
+                        "numero_item": None,
+                        "compra_cnpj": cnpj or "",
+                        "compra_ano": ano or "",
+                        "compra_seq": seq or ""
+                    }]
+
+                # Filtrar termos de busca (limpos, sem pontuação, sem numéricos)
                 palavras_ignoradas = {
                     'aquisicao', 'fornecimento', 'prestacao', 'servico', 'compra', 'contratacao',
-                    'item', 'peca', 'pecas', 'material', 'para', 'com', 'pelo', 'pela'
+                    'item', 'peca', 'pecas', 'material', 'para', 'com', 'pelo', 'pela',
+                    'de', 'da', 'do', 'em', 'no', 'na', 'ao', 'os', 'as', 'um', 'uma'
                 }
                 search_terms = [
-                    t for t in remove_accents(item.lower()).split() 
-                    if len(t) > 2 and t not in palavras_ignoradas
+                    t for t in remove_accents(item_clean.lower()).split()
+                    if len(t) > 1 and t not in palavras_ignoradas
+                    and not t.replace('.', '').replace(',', '').isdigit()
                 ]
                 
+                # Também usar descrição do contrato para matching (mais detalhada que a do item)
+                contrato_desc = remove_accents((doc.get("description", "") + " " + doc.get("title", "")).lower())
+
                 matched_items = []
                 for it in itens_detalhados:
                     desc = remove_accents(it.get("descricao", "").lower())
@@ -241,31 +276,39 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
                         matched_items.append(it)
                         continue
                     
-                    # Regra 1: Todos os termos devem estar presentes (literal ou fuzzy)
-                    if all(term_exists_fuzzy(term, desc) for term in search_terms):
-                        # Regra 2: Relevância Rígida
-                        palavras_desc = [w for w in desc.replace('(', ' ').replace(')', ' ').replace('-', ' ').split() if len(w) > 3 and w not in palavras_ignoradas]
-                        
-                        if palavras_desc:
-                            cabecalho_item = " ".join(palavras_desc[:2])
-                            if not any(term_exists_fuzzy(termo, cabecalho_item) for termo in search_terms):
-                                continue
-                        
-                        # Regra 3: Economia de Escala (Variação de 20%)
-                        if qtd_alvo is not None:
-                            qtd_item = it.get("quantidade", 0)
-                            if qtd_item < qtd_alvo * 0.8 or qtd_item > qtd_alvo * 1.2:
-                                continue
-                                    
-                        # Buscar Valor Homologado
-                        v_homologado = _buscar_valor_homologado(
-                            it["compra_cnpj"], it["compra_ano"], it["compra_seq"], 
-                            it["numero_item"], it["valor_unitario"]
-                        )
-                        it["valor_unitario"] = v_homologado
-                        it["valor_total"] = v_homologado * it["quantidade"]
-                        
-                        matched_items.append(it)
+                    # Para itens de compras reais (com numero_item), matching apenas pela descrição do item
+                    # Para fallback (sem numero_item), usa descrição combinada com contrato
+                    if it.get("numero_item"):
+                        # Regra 1: Matching rigoroso apenas na descrição do item
+                        termos_presentes = sum(1 for term in search_terms if term_exists_fuzzy(term, desc))
+                        if termos_presentes / len(search_terms) < 0.6:
+                            continue
+                    else:
+                        # Fallback: matching combinado item + contrato com threshold maior
+                        desc_combinada = f"{desc} {contrato_desc}"
+                        termos_presentes = sum(1 for term in search_terms if term_exists_fuzzy(term, desc_combinada))
+                        if termos_presentes / len(search_terms) < 0.8:
+                            continue
+                    
+                    # Regra 2: Relevância - pelo menos um termo no início da descrição do item
+                    palavras_desc = [w for w in desc.replace('(', ' ').replace(')', ' ').replace('-', ' ').split() if len(w) > 3 and w not in palavras_ignoradas]
+                    if palavras_desc:
+                        cabecalho_item = " ".join(palavras_desc[:3])
+                        if not any(term_exists_fuzzy(termo, cabecalho_item) for termo in search_terms):
+                            continue
+                    
+                    # Regra 3: Economia de Escala - calcula valor total projetado mas não filtra
+                    # (a unidade do PNCP raramente corresponde à unidade informada pelo usuário)
+                                        
+                    # Buscar Valor Homologado
+                    v_homologado = _buscar_valor_homologado(
+                        it["compra_cnpj"], it["compra_ano"], it["compra_seq"], 
+                        it["numero_item"], it["valor_unitario"]
+                    )
+                    it["valor_unitario"] = v_homologado
+                    it["valor_total"] = v_homologado * it["quantidade"]
+                    
+                    matched_items.append(it)
                         
                 if not matched_items:
                     continue
@@ -333,7 +376,7 @@ def buscar_atas_contratos(item: str, quantidade: str = None, unidade_medida: str
 
     except Exception as e:
         print(f"Erro ao buscar no PNCP: {e}")
-        return []
+        return {"resultados": [], "metricas": {}}
 
 
 if __name__ == "__main__":

@@ -1,0 +1,24 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Git
+.git/
+
+# Arquivos temporários do projeto
+.tmp/
+scratch/
+versions/
+
+# IDE
+.idea/
+.vscode/
+
+# Firebase
+.firebase/
+
+# Docker build context desnecessários
+*.md
