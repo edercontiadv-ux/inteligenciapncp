@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET não está definido. Configure a variável de ambiente JWT_SECRET antes de iniciar a aplicação.');
-}
-
-const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
+
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET não está definido. Configure a variável de ambiente JWT_SECRET antes de iniciar a aplicação.');
+  }
+  return secret;
+}
 
 export interface JwtPayload {
   sub: string;
@@ -26,13 +29,13 @@ export async function comparePassword(password: string, hash: string): Promise<b
 export function signToken(payload: { userId: string; email: string; role: string }): string {
   return jwt.sign(
     { sub: payload.userId, email: payload.email, role: payload.role },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
   );
 }
 
 export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, JWT_SECRET) as JwtPayload;
+  return jwt.verify(token, getJwtSecret()) as JwtPayload;
 }
 
 export function getTokenFromRequest(req: NextRequest): string | null {

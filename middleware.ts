@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET não está definido. Configure a variável de ambiente JWT_SECRET antes de iniciar a aplicação.');
+function getJwtSecret(): Uint8Array {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET não está definido. Configure a variável de ambiente JWT_SECRET antes de iniciar a aplicação.');
+  }
+  return new TextEncoder().encode(process.env.JWT_SECRET);
 }
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const protectedRoutes = ['/profile', '/dashboard', '/api/projects'];
 
@@ -26,7 +27,7 @@ export async function middleware(req: NextRequest) {
 
   try {
     const token = authHeader.slice(7);
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
 
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set('x-user-id', payload.sub as string);
