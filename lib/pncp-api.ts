@@ -49,7 +49,7 @@ function filtrarPorData(items: PNCPResult[], dataInicial: string, dataFinal: str
 export async function searchPNCPText(termo: string, tipoDocumento: 'contrato' | 'ata', pagina: number = 1, dataInicial?: string, dataFinal?: string): Promise<{ results: PNCPResult[]; totalRegistros: number }> {
   if (!termo) return { results: [], totalRegistros: 0 };
   
-  let url = `https://pncp.gov.br/api/search/?q=${encodeURIComponent(termo)}&tipos_documento=${tipoDocumento}&pagina=${pagina}`;
+  let url = `https://pncp.gov.br/api/search/?q=${encodeURIComponent(termo)}&tipos_documento=${tipoDocumento}&pagina=${pagina}&tamanhoPagina=50`;
   
   if (dataInicial && dataFinal) {
     url += `&dataInicial=${dataInicial}&dataFinal=${dataFinal}`;

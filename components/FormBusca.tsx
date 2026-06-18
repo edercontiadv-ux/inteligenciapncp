@@ -25,7 +25,11 @@ export default function FormBusca({ onSearch, isLoading }: FormBuscaProps) {
       });
       if (res.ok) {
         const data = await res.json();
-        const termos = data.termos?.length > 0 ? data.termos : [descricao.trim()];
+        let termos = data.termos?.length > 0 ? data.termos : [];
+        const original = descricao.trim();
+        if (!termos.includes(original)) {
+          termos = [original, ...termos];
+        }
         onSearch(termos);
       } else {
         onSearch([descricao.trim()]);
