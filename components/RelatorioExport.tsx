@@ -3,14 +3,7 @@
 import { PNCPResult } from '@/lib/pncp-api';
 import { FileDown } from 'lucide-react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-
-// Extend jsPDF with autotable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
+import autoTable from 'jspdf-autotable';
 
 interface RelatorioExportProps {
   selectedResults: PNCPResult[];
@@ -19,6 +12,7 @@ interface RelatorioExportProps {
 
 export default function RelatorioExport({ selectedResults, termoBusca }: RelatorioExportProps) {
   const exportPDF = () => {
+    try {
     const doc = new jsPDF();
     const now = new Date().toLocaleDateString('pt-BR');
 
@@ -38,7 +32,7 @@ export default function RelatorioExport({ selectedResults, termoBusca }: Relator
       item.dataVigenciaInicio ? new Date(item.dataVigenciaInicio).toLocaleDateString('pt-BR') : '—'
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 50,
       head: [['Identificação', 'Órgão', 'UF', 'Valor', 'Data Início']],
       body: tableData,
@@ -48,11 +42,14 @@ export default function RelatorioExport({ selectedResults, termoBusca }: Relator
     const total = resultsWithValues.reduce((acc, curr) => acc + (curr.valorInicial || 0), 0);
     const media = resultsWithValues.length > 0 ? total / resultsWithValues.length : 0;
 
-    const finalY = (doc as any).lastAutoTable.cursor.y + 10;
+    const finalY = (doc as any).lastAutoTable?.cursor?.y ? (doc as any).lastAutoTable.cursor.y + 10 : 50;
     doc.setFontSize(12);
     doc.text(`Preço Médio (${resultsWithValues.length} itens com valor): ${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 14, finalY);
 
     doc.save(`relatorio-pesquisa-${termoBusca.replace(/\s+/g, '-')}.pdf`);
+    } catch (err) {
+      console.error('Erro ao exportar PDF:', err);
+    }
   };
 
   return (
