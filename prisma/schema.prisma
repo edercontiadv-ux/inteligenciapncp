@@ -17,6 +17,41 @@ model User {
   @@map("users")
 }
 
+model Client {
+  id        String   @id @default(uuid())
+  name      String   @map("name")
+  document  String   @map("document")
+  email     String?
+  phone     String?
+  notes     String?
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tasks Task[]
+
+  @@map("clients")
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  description String    @map("description")
+  processNumber String  @map("process_number")
+  type        String    @default("Prazo") @map("type")
+  priority    String    @default("media") @map("priority")
+  deadline    DateTime? @map("deadline")
+  responsible String?   @map("responsible")
+  status      String    @default("pendente") @map("status")
+  clientId    String?   @map("client_id")
+  userId      String    @map("user_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  client Client? @relation(fields: [clientId], references: [id])
+
+  @@map("tasks")
+}
+
 model RateLimit {
   id        String   @id @default(uuid())
   key       String   @unique
