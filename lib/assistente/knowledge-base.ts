@@ -74,7 +74,23 @@ const FAQ: KnowledgeEntry[] = [
   },
   {
     keywords: ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'saudações', 'saudacoes'],
-    answer: `Olá! Sou o assistente virtual do Inteligência PNCP. Posso ajudar com dúvidas sobre:\n\n• Como fazer uma pesquisa de preços\n• Como usar os filtros e selecionar resultados\n• Como exportar o relatório PDF\n• Base legal (Lei 14.133/2021)\n• Interpretação dos resultados\n\nComo posso ajudar?`,
+    answer: `Olá! Sou o assistente virtual do Inteligência PNCP. Posso ajudar com dúvidas sobre:\n\n• Como fazer uma pesquisa de preços\n• Como usar os filtros e selecionar resultados\n• Como exportar o relatório PDF\n• Base legal (Lei 14.133/2021)\n• Gerenciamento de tarefas e prazos processuais\n• Cadastro de órgãos/clientes\n\nComo posso ajudar?`,
+  },
+  {
+    keywords: ['tarefa', 'tarefas', 'task', 'tasks', 'prazo', 'processual'],
+    answer: `A aba **Tarefas** permite gerenciar prazos processuais do escritório. Para usar:\n\n1. Acesse a aba "Tarefas" no topo da página.\n2. Clique em "Nova Tarefa" para criar um novo registro.\n3. Preencha: descrição, número do processo, tipo (Prazo/Audiência/Petição), prioridade (Alta/Média/Baixa), prazo, responsável e o órgão vinculado.\n4. As tarefas pendentes aparecem na tabela com prazo regressivo.\n5. Clique no círculo à esquerda para marcar como concluída.\n\nVocê precisa estar logado para acessar esta funcionalidade.`,
+  },
+  {
+    keywords: ['órgão', 'orgao', 'órgãos', 'orgaos', 'cliente', 'clientes', 'cadastro'],
+    answer: `A aba **Órgãos** permite cadastrar os órgãos/clientes do escritório. Para usar:\n\n1. Acesse a aba "Órgãos" no topo da página.\n2. Clique em "Novo Órgão" para cadastrar.\n3. Informe: nome/razão social, CPF/CNPJ, e-mail, telefone e observações.\n4. Os órgãos cadastrados ficam disponíveis para vinculação nas tarefas.\n\nVocê precisa estar logado para acessar esta funcionalidade.`,
+  },
+  {
+    keywords: ['login', 'entrar', 'cadastrar', 'registrar', 'conta', 'autenticar', 'logar', 'acessar'],
+    answer: `Para acessar as funcionalidades de **Tarefas** e **Órgãos**, você precisa estar logado:\n\n1. Clique na aba "Tarefas" ou "Órgãos".\n2. Se não estiver logado, será redirecionado para a tela de login.\n3. Se já tem conta, informe e-mail e senha e clique em "Entrar".\n4. Se não tem conta, clique em "Cadastre-se" e preencha nome, e-mail e senha.\n\nO token de autenticação fica salvo no navegador. Para sair, use o botão de logout no canto superior direito (quando disponível).`,
+  },
+  {
+    keywords: ['navegação', 'navegar', 'abas', 'tabs', 'busca', 'tarefas', 'órgãos', 'orgaos', 'menu'],
+    answer: `O sistema possui três abas de navegação no topo da página:\n\n• **Busca** — Pesquisa de contratos e atas no PNCP (página inicial).\n• **Tarefas** — Gerenciamento de prazos processuais (requer login).\n• **Órgãos** — Cadastro de órgãos/clientes do escritório (requer login).\n\nVocê pode alternar entre as abas a qualquer momento. As tarefas e órgãos são vinculados ao seu usuário.`,
   },
 ];
 
@@ -100,9 +116,9 @@ export function findAnswer(input: string): string | null {
 }
 
 export const SYSTEM_DESCRIPTION = `Sistema: Inteligência PNCP
-Descrição: Ferramenta de composição de preço médio via API do PNCP (Portal Nacional de Contratações Públicas).
-Versão: 0.1.0
-Público-alvo: Servidores públicos que precisam realizar pesquisa de preços conforme Art. 23 da Lei 14.133/2021.
+Descrição: Ferramenta de composição de preço médio via API do PNCP (Portal Nacional de Contratações Públicas), com gestão de tarefas processuais e cadastro de órgãos/clientes.
+Versão: 0.2.0
+Público-alvo: Servidores públicos e escritórios de advocacia que precisam realizar pesquisa de preços conforme Art. 23 da Lei 14.133/2021.
 
 Funcionalidades implementadas:
 - Busca por descrição natural do objeto (IA extrai termos técnicos)
@@ -112,9 +128,15 @@ Funcionalidades implementadas:
 - Exportação de relatório PDF com preço médio
 - 11 temas visuais customizáveis
 - Rate limiting (30 requisições/minuto por IP)
+- Autenticação de usuários (login/cadastro)
+- Gestão de tarefas processuais (prazos, audiências, petições)
+- Cadastro de órgãos/clientes
 
-Fluxo de uso:
+Fluxo de uso (Busca PNCP):
 1. Usuário descreve o objeto → 2. IA extrai termos → 3. API PNCP consultada → 4. Resultados exibidos → 5. Usuário seleciona → 6. Relatório PDF exportado
+
+Fluxo de uso (Tarefas/Órgãos):
+1. Usuário faz login → 2. Cadastra órgãos na aba "Órgãos" → 3. Cria tarefas vinculadas a órgãos na aba "Tarefas"
 
 Base legal:
 - Art. 23, Lei nº 14.133/2021 (obrigatoriedade da pesquisa de preços)

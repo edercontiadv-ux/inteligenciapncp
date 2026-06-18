@@ -181,7 +181,7 @@ ${SYSTEM_DESCRIPTION}`;
     }
 
     const fallbackAnswer = findAnswer(message);
-    const resposta = fallbackAnswer || 'Desculpe, não tenho uma resposta para essa pergunta. Tente perguntar de outra forma ou consulte o README do sistema para mais informações.';
+    const resposta = fallbackAnswer || 'Desculpe, não tenho uma resposta para essa pergunta. Tente perguntar de outra forma ou pergunte sobre: pesquisa de preços, filtros, exportação PDF, tarefas processuais, cadastro de órgãos, login, ou base legal.';
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
