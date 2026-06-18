@@ -7,7 +7,7 @@ import { Search, ClipboardList, Users } from 'lucide-react';
 const tabs = [
   { href: '/', label: 'Busca', icon: Search },
   { href: '/tarefas', label: 'Tarefas', icon: ClipboardList },
-  { href: '/clientes', label: 'Clientes', icon: Users },
+  { href: '/orgaos', label: 'Órgãos', icon: Users },
 ];
 
 export default function NavigationTabs() {

@@ -14,7 +14,7 @@ interface Client {
   notes: string | null;
 }
 
-export default function ClientesPage() {
+export default function OrgaosPage() {
   const { user, token, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
@@ -71,7 +71,7 @@ export default function ClientesPage() {
   };
 
   const deleteClient = async (id: string) => {
-    if (!confirm('Excluir este cliente? As tarefas vinculadas perderão a referência.')) return;
+    if (!confirm('Excluir este órgão? As tarefas vinculadas perderão a referência.')) return;
     await fetch(`/api/clientes?id=${id}`, { method: 'DELETE', headers: authHeaders(token) });
     loadClients();
   };
@@ -84,12 +84,12 @@ export default function ClientesPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="font-heading text-2xl text-brand-navy">Clientes</h2>
-          <p className="font-body text-sm text-brand-navy/50">{clients.length} cliente{clients.length !== 1 ? 's' : ''}</p>
+          <h2 className="font-heading text-2xl text-brand-navy">Órgãos</h2>
+          <p className="font-body text-sm text-brand-navy/50">{clients.length} órgão{clients.length !== 1 ? 's' : ''}</p>
         </div>
         <button onClick={() => { setShowForm(true); setEditingId(null); setForm({ name: '', document: '', email: '', phone: '', notes: '' }); }} className="btn-primary text-sm">
           <Plus className="w-4 h-4 mr-1.5" />
-          Novo Cliente
+          Novo Órgão
         </button>
       </div>
 
@@ -156,7 +156,7 @@ export default function ClientesPage() {
         ))}
         {clients.length === 0 && !showForm && (
           <div className="sm:col-span-2 lg:col-span-3 text-center py-16 font-body text-sm text-brand-navy/50">
-            Nenhum cliente cadastrado. Clique em "Novo Cliente" para começar.
+            Nenhum órgão cadastrado. Clique em "Novo Órgão" para começar.
           </div>
         )}
       </div>
