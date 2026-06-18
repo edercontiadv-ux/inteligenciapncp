@@ -25,7 +25,7 @@ export const themes: Theme[] = [
     description: 'Sóbrio e refinado com identidade brasileira',
     colors: {
       navy: '10, 31, 63',
-      gold: '200, 150, 62',
+      gold: '180, 130, 40',
       forest: '27, 107, 74',
       cream: '247, 245, 240',
       ink: '26, 26, 46',

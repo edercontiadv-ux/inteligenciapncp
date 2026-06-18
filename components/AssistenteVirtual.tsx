@@ -143,6 +143,7 @@ export default function AssistenteVirtual() {
               <button
                 onClick={() => setIsOpen(false)}
                 className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+                aria-label="Fechar assistente"
               >
                 <X className="w-4 h-4 text-white/70" />
               </button>
@@ -196,6 +197,7 @@ export default function AssistenteVirtual() {
                   type="submit"
                   disabled={isLoading || !input.trim()}
                   className="btn-primary !px-3 !py-2.5 shrink-0"
+                  aria-label="Enviar mensagem"
                 >
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -215,6 +217,7 @@ export default function AssistenteVirtual() {
               ? 'bg-brand-navy rotate-90'
               : 'bg-brand-navy hover:bg-brand-navy/90'
           }`}
+          aria-label={isOpen ? 'Fechar assistente' : 'Abrir assistente'}
         >
           {isOpen ? (
             <ChevronDown className="w-6 h-6 text-white" />

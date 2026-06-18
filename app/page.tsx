@@ -103,11 +103,11 @@ export default function Home() {
           </div>
           <p className="font-heading text-xl text-brand-navy mb-1">Nenhum resultado encontrado</p>
           <p className="font-body text-sm text-brand-navy/50 max-w-md text-center">
-            Tente descrever o objeto de forma diferente ou use termos mais genéricos.
+            A busca considera apenas contratos e atas dos últimos 12 meses. Tente descrever o objeto de forma diferente ou use termos mais genéricos.
           </p>
         </div>
       ) : results.length > 0 ? (
-        <div className="space-y-6 animate-fade-up">
+        <div className="space-y-6 animate-fade-up" role="status" aria-live="polite">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
             <div>
               <h3 className="font-heading text-xl text-brand-navy">

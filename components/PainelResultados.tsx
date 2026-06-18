@@ -158,6 +158,7 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
               onClick={toggleSortDir}
               className="p-1.5 rounded-lg hover:bg-brand-sand/20 text-brand-navy/50 hover:text-brand-navy transition-colors"
               title={sortDir === 'asc' ? 'Crescente' : 'Decrescente'}
+              aria-label={`Ordenar ${sortDir === 'asc' ? 'decrescente' : 'crescente'}`}
             >
               <ArrowUpDown className={`w-3.5 h-3.5 transition-transform ${sortDir === 'asc' ? 'rotate-180' : ''}`} />
             </button>
@@ -191,6 +192,7 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
               className="p-1 rounded hover:bg-brand-sand/20 disabled:opacity-30 transition-colors"
+              aria-label="Página anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -199,6 +201,7 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="p-1 rounded hover:bg-brand-sand/20 disabled:opacity-30 transition-colors"
+              aria-label="Próxima página"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -240,7 +243,7 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
             <SlidersHorizontal className="w-5 h-5 text-brand-navy/30" />
           </div>
           <p className="font-body text-sm text-brand-navy/50">
-            Nenhum resultado encontrado para os filtros aplicados.
+            Nenhum resultado encontrado para os filtros aplicados. Tente ampliar os valores ou remover filtros.
           </p>
         </div>
       )}

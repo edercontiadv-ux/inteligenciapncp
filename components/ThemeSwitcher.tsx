@@ -25,6 +25,7 @@ export default function ThemeSwitcher() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 text-xs text-brand-navy/40 hover:text-brand-navy/70 transition-colors"
         title="Trocar tema"
+        aria-label="Trocar tema"
       >
         <Palette className="w-4 h-4" />
         <span className="hidden sm:inline">{theme.name}</span>
