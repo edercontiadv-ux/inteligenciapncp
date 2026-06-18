@@ -25,10 +25,9 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules/next ./node_modules/next
+COPY --chown=nextjs:nodejs start.sh ./
 USER nextjs
 EXPOSE 8080
 ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
-COPY --chown=nextjs:nodejs start.sh ./
-RUN chmod +x start.sh
 CMD ["sh", "./start.sh"]
