@@ -1,21 +1,35 @@
-const requestCounts = new Map<string, { count: number; resetAt: number }>();
+import { prisma } from './prisma';
 
 const WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS = 30;
 
-export function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetAt: number } {
-  const now = Date.now();
-  const entry = requestCounts.get(ip);
+export async function checkRateLimit(ip: string): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  const now = new Date();
+  const key = `rl:${ip}`;
 
-  if (!entry || now > entry.resetAt) {
-    requestCounts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, remaining: MAX_REQUESTS - 1, resetAt: now + WINDOW_MS };
+  try {
+    const existing = await prisma.rateLimit.findUnique({ where: { key } });
+
+    if (!existing || now > existing.resetAt) {
+      await prisma.rateLimit.upsert({
+        where: { key },
+        update: { count: 1, resetAt: new Date(now.getTime() + WINDOW_MS) },
+        create: { key, count: 1, resetAt: new Date(now.getTime() + WINDOW_MS) },
+      });
+      return { allowed: true, remaining: MAX_REQUESTS - 1, resetAt: now.getTime() + WINDOW_MS };
+    }
+
+    if (existing.count >= MAX_REQUESTS) {
+      return { allowed: false, remaining: 0, resetAt: existing.resetAt.getTime() };
+    }
+
+    await prisma.rateLimit.update({
+      where: { key },
+      data: { count: { increment: 1 } },
+    });
+
+    return { allowed: true, remaining: MAX_REQUESTS - existing.count - 1, resetAt: existing.resetAt.getTime() };
+  } catch {
+    return { allowed: true, remaining: MAX_REQUESTS, resetAt: now.getTime() + WINDOW_MS };
   }
-
-  entry.count++;
-  if (entry.count > MAX_REQUESTS) {
-    return { allowed: false, remaining: 0, resetAt: entry.resetAt };
-  }
-
-  return { allowed: true, remaining: MAX_REQUESTS - entry.count, resetAt: entry.resetAt };
 }

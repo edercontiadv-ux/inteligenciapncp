@@ -339,33 +339,67 @@ GET https://pncp.gov.br/api/consulta/v1/atas?dataInicial=20240520&dataFinal=2025
  
 --- 
  
-## Estrutura do projeto 
- 
-``` 
-pesquisa-preco-pncp/ 
-├── app/ 
-│   ├── page.tsx              # Página principal (interface do usuário) 
-│   ├── layout.tsx            # Layout base 
-│   └── api/ 
-│       ├── buscar/ 
-│       │   └── route.ts      # Rota que chama a API do PNCP 
-│       └── depurar-termos/ 
-│           └── route.ts      # Rota que chama a IA Claude para refinar termos 
-├── components/ 
-│   ├── FormBusca.tsx         # Formulário de descrição do objeto 
-│   ├── PainelResultados.tsx  # Painel com cards dos resultados 
-│   ├── CardContrato.tsx      # Card individual de contrato 
-│   ├── CardAta.tsx           # Card individual de ata 
-│   └── RelatorioExport.tsx   # Geração do relatório PDF 
-├── lib/ 
-│   ├── pncp-api.ts           # Funções de chamada à API do PNCP 
-│   ├── claude-ai.ts          # Integração com API da Anthropic 
-│   └── date-utils.ts         # Cálculo do período de 12 meses 
-├── .env.example              # Modelo do arquivo de configuração 
-├── .env.local                # Suas configurações (não versionar!) 
-├── package.json 
-└── README.md 
-``` 
+## Estrutura do projeto
+
+```
+pesquisa-preco-pncp/
+├── app/
+│   ├── page.tsx              # Página principal (interface do usuário)
+│   ├── layout.tsx            # Layout base
+│   └── api/
+│       ├── buscar/
+│       │   └── route.ts      # Rota de busca na API do PNCP
+│       ├── depurar-termos/
+│       │   └── route.ts      # Rota de depuração de termos via IA
+│       ├── assistente/
+│       │   └── route.ts      # Rota do assistente virtual
+│       ├── auth/
+│       │   ├── login/
+│       │   │   └── route.ts  # Autenticação
+│       │   └── register/
+│       │       └── route.ts  # Cadastro de usuários
+│       ├── health/
+│       │   └── route.ts      # Health-check da API do PNCP
+│       └── profile/
+│           └── route.ts      # Perfil do usuário
+├── components/
+│   ├── FormBusca.tsx         # Formulário de descrição do objeto
+│   ├── PainelResultados.tsx  # Painel com cards dos resultados
+│   ├── CardEstatisticas.tsx  # Card com médias, mediana, mínimo e máximo
+│   ├── CardContrato.tsx      # Card individual de contrato
+│   ├── CardAta.tsx           # Card individual de ata
+│   ├── SkeletonCard.tsx      # Placeholder de carregamento
+│   ├── RelatorioExport.tsx   # Geração do relatório PDF
+│   ├── ThemeProvider.tsx     # Provedor de temas
+│   ├── ThemeSwitcher.tsx     # Seletor de temas
+│   ├── AssistenteVirtual.tsx # Chat com assistente virtual
+│   └── PNCPStatusIndicator.tsx # Indicador de status da API
+├── lib/
+│   ├── pncp-api.ts           # Funções de chamada à API do PNCP
+│   ├── llm.ts                # Provedores de IA (Anthropic, OpenAI, fallback)
+│   ├── auth.ts               # Autenticação JWT
+│   ├── prisma.ts             # Cliente Prisma (SQLite/PostgreSQL)
+│   ├── rate-limiter.ts       # Rate limiter via banco de dados
+│   ├── themes.ts             # Definição dos temas visuais
+│   ├── date-utils.ts         # Cálculo do período de 12 meses
+│   └── estatisticas.ts       # Cálculo de médias e estatísticas
+├── prisma/
+│   ├── schema.prisma         # Schema do banco de dados
+│   └── migrations/           # Migrações do banco
+├── public/
+│   ├── favicon.svg           # Favicon da aplicação
+│   ├── icon.svg              # Ícone PWA
+│   └── og-image.svg          # Imagem Open Graph
+├── versions/
+│   └── legado/               # Código legado Python (arquivo histórico)
+├── .env.example              # Modelo do arquivo de configuração
+├── .env                      # Configurações (não versionar!)
+├── Dockerfile                # Build para Cloud Run
+├── firebase.json             # Configuração Firebase Hosting
+├── next.config.mjs           # Configuração Next.js
+├── package.json
+└── README.md
+```
  
 --- 
  

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, Sparkles } from 'lucide-react';
 
 interface FormBuscaProps {
   onSearch: (termos: string[]) => void;
@@ -10,11 +10,31 @@ interface FormBuscaProps {
 
 export default function FormBusca({ onSearch, isLoading }: FormBuscaProps) {
   const [descricao, setDescricao] = useState('');
+  const [isDepurando, setIsDepurando] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!descricao.trim()) return;
-    onSearch([descricao.trim()]);
+    if (!descricao.trim() || isDepurando) return;
+
+    setIsDepurando(true);
+    try {
+      const res = await fetch('/api/depurar-termos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descricao: descricao.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const termos = data.termos?.length > 0 ? data.termos : [descricao.trim()];
+        onSearch(termos);
+      } else {
+        onSearch([descricao.trim()]);
+      }
+    } catch {
+      onSearch([descricao.trim()]);
+    } finally {
+      setIsDepurando(false);
+    }
   };
 
   return (
@@ -49,15 +69,17 @@ export default function FormBusca({ onSearch, isLoading }: FormBuscaProps) {
             </p>
             <button
               type="submit"
-              disabled={isLoading || !descricao.trim()}
+              disabled={isLoading || isDepurando || !descricao.trim()}
               className="btn-primary shrink-0"
             >
-              {isLoading ? (
+              {isDepurando ? (
+                <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              ) : isLoading ? (
                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
               ) : (
-                <Search className="mr-2 h-4 w-4" />
+                <Sparkles className="mr-2 h-4 w-4" />
               )}
-              Buscar no PNCP
+              {isDepurando ? 'Analisando descrição...' : isLoading ? 'Buscando...' : 'Buscar no PNCP'}
             </button>
           </div>
         </form>

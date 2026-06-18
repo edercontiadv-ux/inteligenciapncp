@@ -38,11 +38,22 @@ export function sanitizarInput(input: string): string {
     .slice(0, 200);
 }
 
-export async function searchPNCPText(termo: string, tipoDocumento: 'contrato' | 'ata', pagina: number = 1): Promise<{ results: PNCPResult[]; totalRegistros: number }> {
+function filtrarPorData(items: PNCPResult[], dataInicial: string, dataFinal: string): PNCPResult[] {
+  return items.filter((item) => {
+    if (!item.dataVigenciaInicio) return false;
+    const dataItem = item.dataVigenciaInicio.replace(/\D/g, '').slice(0, 8);
+    return dataItem >= dataInicial && dataItem <= dataFinal;
+  });
+}
+
+export async function searchPNCPText(termo: string, tipoDocumento: 'contrato' | 'ata', pagina: number = 1, dataInicial?: string, dataFinal?: string): Promise<{ results: PNCPResult[]; totalRegistros: number }> {
   if (!termo) return { results: [], totalRegistros: 0 };
   
-  // A API de busca textual usa a raiz pncp.gov.br
-  const url = `https://pncp.gov.br/api/search/?q=${encodeURIComponent(termo)}&tipos_documento=${tipoDocumento}&pagina=${pagina}`;
+  let url = `https://pncp.gov.br/api/search/?q=${encodeURIComponent(termo)}&tipos_documento=${tipoDocumento}&pagina=${pagina}`;
+  
+  if (dataInicial && dataFinal) {
+    url += `&dataInicial=${dataInicial}&dataFinal=${dataFinal}`;
+  }
   
   try {
     const response = await fetch(url);
@@ -52,7 +63,7 @@ export async function searchPNCPText(termo: string, tipoDocumento: 'contrato' | 
     const data = await response.json();
     const rawItems = data?.items || [];
     
-    const results: PNCPResult[] = rawItems.map((item: any) => ({
+    let results: PNCPResult[] = rawItems.map((item: any) => ({
       tipo: tipoDocumento === 'contrato' ? 'CONTRATO' : 'ATA',
       numeroContrato: item.numero_sequencial || item.numero,
       anoContrato: parseInt(item.ano, 10),
@@ -75,9 +86,13 @@ export async function searchPNCPText(termo: string, tipoDocumento: 'contrato' | 
       linkArquivo: item.item_url ? `https://pncp.gov.br/app${item.item_url}` : ''
     }));
 
+    if (dataInicial && dataFinal) {
+      results = filtrarPorData(results, dataInicial, dataFinal);
+    }
+
     return {
       results,
-      totalRegistros: data?.total || 0
+      totalRegistros: results.length,
     };
   } catch (error) {
     console.error(`Error fetching from PNCP Search (${tipoDocumento}):`, error);
@@ -86,11 +101,11 @@ export async function searchPNCPText(termo: string, tipoDocumento: 'contrato' | 
 }
 
 export async function buscarContratos(q: string, dataInicial: string, dataFinal: string) {
-  const result = await searchPNCPText(q, 'contrato');
+  const result = await searchPNCPText(q, 'contrato', 1, dataInicial, dataFinal);
   return { ...result, totalPaginas: 1 };
 }
 
 export async function buscarAtas(q: string, dataInicial: string, dataFinal: string) {
-  const result = await searchPNCPText(q, 'ata');
+  const result = await searchPNCPText(q, 'ata', 1, dataInicial, dataFinal);
   return { ...result, totalPaginas: 1 };
 }

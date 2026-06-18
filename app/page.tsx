@@ -3,8 +3,9 @@
 import { useState, useRef } from 'react';
 import FormBusca from '@/components/FormBusca';
 import PainelResultados from '@/components/PainelResultados';
+import SkeletonCard from '@/components/SkeletonCard';
 import { PNCPResult } from '@/lib/pncp-api';
-import { Loader2, SearchX, Scale, TrendingDown } from 'lucide-react';
+import { SearchX, Scale, TrendingDown } from 'lucide-react';
 
 export default function Home() {
   const [results, setResults] = useState<PNCPResult[]>([]);
@@ -87,12 +88,13 @@ export default function Home() {
       )}
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
-          <div className="relative mb-6">
-            <Loader2 className="w-10 h-10 animate-spin text-brand-navy" />
-            <div className="absolute inset-0 w-10 h-10 rounded-full border-2 border-brand-gold/20 animate-ping" />
+        <div className="space-y-6 animate-fade-in">
+          <div className="text-center">
+            <p className="font-body text-sm text-brand-navy/60">Consultando PNCP (últimos 12 meses)...</p>
           </div>
-          <p className="font-body text-brand-navy/60">Consultando PNCP (últimos 12 meses)...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
         </div>
       ) : jaPesquisou && results.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 animate-fade-up">

@@ -4,7 +4,8 @@ import { useState, useMemo } from 'react';
 import { PNCPResult, gerarId } from '@/lib/pncp-api';
 import CardContrato from './CardContrato';
 import CardAta from './CardAta';
-import { SlidersHorizontal, X } from 'lucide-react';
+import CardEstatisticas from './CardEstatisticas';
+import { SlidersHorizontal, X, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import RelatorioExport from './RelatorioExport';
 
 interface PainelResultadosProps {
@@ -12,15 +13,23 @@ interface PainelResultadosProps {
   termoBusca: string;
 }
 
+type SortField = 'valor' | 'data' | 'uf';
+type SortDir = 'asc' | 'desc';
+
+const ITEMS_PER_PAGE = 12;
+
 export default function PainelResultados({ results, termoBusca }: PainelResultadosProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filterUF, setFilterUF] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
   const [filterValorMin, setFilterValorMin] = useState('');
   const [filterValorMax, setFilterValorMax] = useState('');
+  const [sortField, setSortField] = useState<SortField>('valor');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [page, setPage] = useState(1);
 
   const handleSelect = (id: string) => {
-    setSelectedIds(prev => 
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
@@ -38,11 +47,32 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
     });
   }, [results, filterUF, filterTipo, filterValorMin, filterValorMax]);
 
+  const sortedResults = useMemo(() => {
+    return [...filteredResults].sort((a, b) => {
+      let cmp = 0;
+      switch (sortField) {
+        case 'valor':
+          cmp = (a.valorInicial || 0) - (b.valorInicial || 0);
+          break;
+        case 'data':
+          cmp = (a.dataVigenciaInicio || '').localeCompare(b.dataVigenciaInicio || '');
+          break;
+        case 'uf':
+          cmp = (a.unidadeOrgao?.ufSigla || '').localeCompare(b.unidadeOrgao?.ufSigla || '');
+          break;
+      }
+      return sortDir === 'desc' ? -cmp : cmp;
+    });
+  }, [filteredResults, sortField, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedResults.length / ITEMS_PER_PAGE));
+  const paginatedResults = sortedResults.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
   const selectedResults = useMemo(() => {
     return results.filter((item, index) => selectedIds.includes(gerarId(item, index)));
   }, [results, selectedIds]);
 
-  const ufs = useMemo(() => 
+  const ufs = useMemo(() =>
     Array.from(new Set(results.map(r => r.unidadeOrgao?.ufSigla).filter(Boolean))).sort(),
     [results]
   );
@@ -54,10 +84,16 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
     setFilterTipo('');
     setFilterValorMin('');
     setFilterValorMax('');
+    setPage(1);
   };
+
+  const toggleSortDir = () => setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
 
   return (
     <div className="space-y-6">
+      {/* Stats card */}
+      <CardEstatisticas results={filteredResults} />
+
       {/* Filter bar */}
       <div className="rounded-xl border border-brand-sand/30 bg-white shadow-sm p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-3">
@@ -70,7 +106,7 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
 
           <select
             value={filterUF}
-            onChange={(e) => setFilterUF(e.target.value)}
+            onChange={(e) => { setFilterUF(e.target.value); setPage(1); }}
             className="select-field text-xs"
           >
             <option value="">Todas as UFs</option>
@@ -79,7 +115,7 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
 
           <select
             value={filterTipo}
-            onChange={(e) => setFilterTipo(e.target.value)}
+            onChange={(e) => { setFilterTipo(e.target.value); setPage(1); }}
             className="select-field text-xs"
           >
             <option value="">Todos os tipos</option>
@@ -107,6 +143,26 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
             />
           </div>
 
+          {/* Sort controls */}
+          <div className="flex items-center gap-1">
+            <select
+              value={sortField}
+              onChange={(e) => setSortField(e.target.value as SortField)}
+              className="select-field text-xs"
+            >
+              <option value="valor">Valor</option>
+              <option value="data">Data</option>
+              <option value="uf">UF</option>
+            </select>
+            <button
+              onClick={toggleSortDir}
+              className="p-1.5 rounded-lg hover:bg-brand-sand/20 text-brand-navy/50 hover:text-brand-navy transition-colors"
+              title={sortDir === 'asc' ? 'Crescente' : 'Decrescente'}
+            >
+              <ArrowUpDown className={`w-3.5 h-3.5 transition-transform ${sortDir === 'asc' ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
           {hasActiveFilters && (
             <button
               onClick={limparFiltros}
@@ -126,17 +182,41 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
         </div>
       </div>
 
+      {/* Pagination info */}
+      <div className="flex items-center justify-between text-xs text-brand-navy/50">
+        <span>{sortedResults.length} registro{sortedResults.length !== 1 ? 's' : ''}</span>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="p-1 rounded hover:bg-brand-sand/20 disabled:opacity-30 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span>Página {page} de {totalPages}</span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="p-1 rounded hover:bg-brand-sand/20 disabled:opacity-30 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredResults.map((item, index) => {
-          const id = gerarId(item, index);
+        {paginatedResults.map((item, index) => {
+          const id = gerarId(item, (page - 1) * ITEMS_PER_PAGE + index);
           const staggerClass = `stagger-${Math.min(index + 1, 8)}`;
 
           return item.tipo === 'CONTRATO' ? (
             <div key={id} className={`animate-fade-up opacity-0 ${staggerClass}`}>
               <CardContrato
                 data={item}
-                index={index}
+                index={(page - 1) * ITEMS_PER_PAGE + index}
                 onSelect={handleSelect}
                 isSelected={selectedIds.includes(id)}
               />
@@ -145,7 +225,7 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
             <div key={id} className={`animate-fade-up opacity-0 ${staggerClass}`}>
               <CardAta
                 data={item}
-                index={index}
+                index={(page - 1) * ITEMS_PER_PAGE + index}
                 onSelect={handleSelect}
                 isSelected={selectedIds.includes(id)}
               />

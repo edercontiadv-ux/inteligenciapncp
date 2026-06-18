@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model User {
@@ -15,4 +15,14 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
 
   @@map("users")
+}
+
+model RateLimit {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  count     Int      @default(1)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@map("rate_limits")
 }

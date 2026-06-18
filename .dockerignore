@@ -1,24 +1,16 @@
-# Python
-venv/
-__pycache__/
-*.pyc
-*.pyo
-.env
-
-# Git
-.git/
-
-# Arquivos temporários do projeto
-.tmp/
-scratch/
-versions/
-
-# IDE
-.idea/
-.vscode/
-
-# Firebase
-.firebase/
-
-# Docker build context desnecessários
+node_modules
+.git
+.gitignore
 *.md
+.env
+.env.local
+.env.backup.*
+venv
+__pycache__
+*.pyc
+.gitkeep
+.next
+scratch
+execution
+awesome-claude-skills-master
+versions

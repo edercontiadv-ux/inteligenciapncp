@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { Theme, themes, defaultTheme } from '@/lib/themes';
+import { Theme, activeThemes, defaultTheme } from '@/lib/themes';
 
 interface ThemeContextValue {
   theme: Theme;
@@ -12,11 +12,22 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue>({
   theme: defaultTheme,
   setTheme: () => {},
-  availableThemes: themes,
+  availableThemes: activeThemes,
 });
 
 export function useTheme() {
   return useContext(ThemeContext);
+}
+
+function loadFonts(urls: string[]) {
+  urls.forEach((url) => {
+    if (!document.querySelector(`link[href="${url}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = url;
+      document.head.appendChild(link);
+    }
+  });
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -27,13 +38,13 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     setMounted(true);
     const saved = localStorage.getItem('inteligencia-pncp-theme');
     if (saved) {
-      const found = themes.find((t) => t.id === saved);
+      const found = activeThemes.find((t) => t.id === saved);
       if (found) setThemeState(found);
     }
   }, []);
 
   const setTheme = useCallback((id: string) => {
-    const found = themes.find((t) => t.id === id);
+    const found = activeThemes.find((t) => t.id === id);
     if (found) {
       setThemeState(found);
       localStorage.setItem('inteligencia-pncp-theme', id);
@@ -56,10 +67,16 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     r.setProperty('--brand-mist', c.mist);
     r.setProperty('--font-heading', theme.fonts.heading);
     r.setProperty('--font-body', theme.fonts.body);
+
+    loadFonts(theme.fontUrls);
   }, [theme, mounted]);
 
+  useEffect(() => {
+    if (mounted) loadFonts(defaultTheme.fontUrls);
+  }, [mounted]);
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, availableThemes: themes }}>
+    <ThemeContext.Provider value={{ theme, setTheme, availableThemes: activeThemes }}>
       {children}
     </ThemeContext.Provider>
   );

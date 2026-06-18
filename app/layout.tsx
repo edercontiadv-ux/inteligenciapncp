@@ -3,10 +3,18 @@ import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import AssistenteVirtual from "@/components/AssistenteVirtual";
+import PNCPStatusIndicator from "@/components/PNCPStatusIndicator";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "Inteligência PNCP",
   description: "Ferramenta de Composição de Preço Médio via API do PNCP",
+  icons: [{ rel: 'icon', url: '/favicon.svg', type: 'image/svg+xml' }],
+  openGraph: {
+    title: 'Inteligência PNCP',
+    description: 'Ferramenta de Composição de Preço Médio via API do PNCP',
+    images: [{ url: '/og-image.svg', width: 1200, height: 630 }],
+  },
 };
 
 export default function RootLayout({
@@ -38,10 +46,7 @@ export default function RootLayout({
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="hidden sm:flex items-center gap-2 text-xs text-brand-navy/40">
-                    <span className="w-2 h-2 rounded-full bg-brand-forest animate-pulse" />
-                    API PNCP Online
-                  </div>
+                  <PNCPStatusIndicator />
                   <ThemeSwitcher />
                 </div>
               </div>

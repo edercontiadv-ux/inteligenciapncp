@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Send, Loader2, Bot, ChevronDown } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -158,7 +159,7 @@ export default function AssistenteVirtual() {
                     }`}
                   >
                     <div className="prose prose-sm max-w-none prose-p:my-0.5 prose-strong:text-inherit">
-                      {msg.content}
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   </div>
                 </div>
@@ -166,7 +167,7 @@ export default function AssistenteVirtual() {
               {streamingContent && (
                 <div className="flex justify-start">
                   <div className="max-w-[85%] rounded-xl px-3.5 py-2.5 font-body text-sm leading-relaxed bg-brand-mist/50 text-brand-ink rounded-bl-md">
-                    {streamingContent}<span className="animate-pulse">▌</span>
+                    <ReactMarkdown>{streamingContent}</ReactMarkdown><span className="animate-pulse">▌</span>
                   </div>
                 </div>
               )}

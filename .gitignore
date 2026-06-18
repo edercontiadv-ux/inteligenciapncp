@@ -20,5 +20,10 @@ __pycache__/
 venv/
 .idea/
 .vscode/
+*.tsbuildinfo
+*.db
+*.db-journal
 
 /lib/generated/prisma
+prisma/dev.db
+.env.backup.*

@@ -1,27 +1,29 @@
-# ─── Imagem base leve ───────────────────────────────────────────────────────
-FROM python:3.11-slim
+FROM node:20-alpine AS base
 
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production
 
-# Dependências do sistema (necessário para fpdf2 e compilação de algumas libs)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Instala dependências Python primeiro (cache de camadas)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copia o código da aplicação
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npx prisma generate
+RUN npm run build
 
-# Porta padrão do Cloud Run
+FROM base AS runner
+WORKDIR /app
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+USER nextjs
 EXPOSE 8080
-
-# Inicia o Streamlit na porta do Cloud Run ($PORT ou 8080)
-CMD streamlit run app.py \
-    --server.port=${PORT:-8080} \
-    --server.address=0.0.0.0 \
-    --server.headless=true \
-    --server.enableCORS=false \
-    --server.enableXsrfProtection=false
+ENV PORT=8080
+ENV HOSTNAME="0.0.0.0"
+CMD ["node", "server.js"]
