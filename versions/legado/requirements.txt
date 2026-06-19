@@ -1,8 +1,0 @@
-streamlit
-requests
-python-dateutil
-fpdf2==2.8.7
-pandas
-numpy
-tenacity
-openpyxl

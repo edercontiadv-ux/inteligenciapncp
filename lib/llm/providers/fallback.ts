@@ -20,7 +20,7 @@ export function createFallbackProvider(): LLMProvider {
         return [descricao];
       }
 
-      return palavras.slice(0, 5);
+      return palavras.slice(0, 8);
     },
   };
 }

@@ -20,10 +20,17 @@ export default function CardEstatisticas({ results }: CardEstatisticasProps) {
 
   return (
     <div className="rounded-xl border border-brand-sand/30 bg-white shadow-sm p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <BarChart3 className="w-4 h-4 text-brand-navy/50" />
-        <h3 className="font-heading text-sm font-medium text-brand-navy/70">Estatísticas</h3>
-        <span className="font-body text-xs text-brand-navy/40 ml-auto">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-brand-navy/50" />
+          <h3 className="font-heading text-sm font-medium text-brand-navy/70">Estatísticas</h3>
+          {stats.outliersRemovidos > 0 && (
+            <span className="bg-brand-gold/10 text-brand-gold px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+              {stats.outliersRemovidos} outliers ignorados (TCU)
+            </span>
+          )}
+        </div>
+        <span className="font-body text-xs text-brand-navy/40">
           {stats.itensComValor} de {stats.totalItens} itens com valor
         </span>
       </div>

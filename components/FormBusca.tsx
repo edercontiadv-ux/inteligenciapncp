@@ -10,35 +10,19 @@ interface FormBuscaProps {
 
 export default function FormBusca({ onSearch, isLoading }: FormBuscaProps) {
   const [descricao, setDescricao] = useState('');
-  const [isDepurando, setIsDepurando] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!descricao.trim() || isDepurando) return;
-
-    setIsDepurando(true);
-    try {
-      const res = await fetch('/api/depurar-termos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ descricao: descricao.trim() }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        let termos = data.termos?.length > 0 ? data.termos : [];
-        const original = descricao.trim();
-        if (!termos.includes(original)) {
-          termos = [original, ...termos];
-        }
-        onSearch(termos);
-      } else {
-        onSearch([descricao.trim()]);
-      }
-    } catch {
-      onSearch([descricao.trim()]);
-    } finally {
-      setIsDepurando(false);
+    const textoLimpo = descricao.trim();
+    if (!textoLimpo || isLoading) return;
+    
+    // Limite de caracteres para evitar strings muito grandes na API do governo
+    if (textoLimpo.length > 300) {
+      alert("A descrição é muito longa. Por favor, resuma em poucas palavras-chave (ex: 'cadeira ergonômica preta') para uma busca mais eficiente.");
+      return;
     }
+
+    onSearch([textoLimpo]);
   };
 
   return (
@@ -73,17 +57,15 @@ export default function FormBusca({ onSearch, isLoading }: FormBuscaProps) {
             </p>
             <button
               type="submit"
-              disabled={isLoading || isDepurando || !descricao.trim()}
+              disabled={isLoading || !descricao.trim()}
               className="btn-primary shrink-0"
             >
-              {isDepurando ? (
-                <Loader2 className="animate-spin mr-2 h-4 w-4" />
-              ) : isLoading ? (
+              {isLoading ? (
                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
               ) : (
-                <Sparkles className="mr-2 h-4 w-4" />
+                <Search className="mr-2 h-4 w-4" />
               )}
-              {isDepurando ? 'Analisando descrição...' : isLoading ? 'Buscando...' : 'Buscar no PNCP'}
+              {isLoading ? 'Buscando...' : 'Buscar no PNCP'}
             </button>
           </div>
         </form>

@@ -38,13 +38,18 @@ export default function RelatorioExport({ selectedResults, termoBusca }: Relator
       body: tableData,
     });
 
-    const resultsWithValues = selectedResults.filter(item => item.valorInicial && item.valorInicial > 0);
-    const total = resultsWithValues.reduce((acc, curr) => acc + (curr.valorInicial || 0), 0);
-    const media = resultsWithValues.length > 0 ? total / resultsWithValues.length : 0;
+    const { calcularEstatisticas } = require('@/lib/estatisticas');
+    const stats = calcularEstatisticas(selectedResults);
 
     const finalY = (doc as any).lastAutoTable?.cursor?.y ? (doc as any).lastAutoTable.cursor.y + 10 : 50;
     doc.setFontSize(12);
-    doc.text(`Preço Médio (${resultsWithValues.length} itens com valor): ${media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 14, finalY);
+    
+    let textoMedia = `Preço Médio (${stats.itensComValor} itens com valor): ${stats.media.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
+    if (stats.outliersRemovidos > 0) {
+      textoMedia += ` | * ${stats.outliersRemovidos} valores extremos ignorados (Regra TCU)`;
+    }
+    
+    doc.text(textoMedia, 14, finalY);
 
     doc.save(`relatorio-pesquisa-${termoBusca.replace(/\s+/g, '-')}.pdf`);
     } catch (err) {
