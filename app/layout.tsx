@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import AssistenteVirtual from "@/components/AssistenteVirtual";
 import PNCPStatusIndicator from "@/components/PNCPStatusIndicator";
 import NavigationTabs from "@/components/NavigationTabs";
 import { AuthProvider } from "@/lib/auth-context";
@@ -76,7 +75,6 @@ export default function RootLayout({
                 </div>
               </footer>
             </div>
-            <AssistenteVirtual />
           </AuthProvider>
         </ThemeProvider>
       </body>

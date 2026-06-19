@@ -11,7 +11,7 @@
         "source": "**",
         "run": {
           "serviceId": "inteligencia-pncp",
-          "region": "us-central1"
+          "region": "southamerica-east1"
         }
       }
     ],
