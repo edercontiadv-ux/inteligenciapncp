@@ -9,6 +9,14 @@ const STOPWORDS = new Set([
   'como', 'qual', 'quais', 'onde', 'mais', 'mas', 'que', 'sao',
 ]);
 
+const GENERIC_TERMS = new Set([
+  'locacao', 'aquisicao', 'contratacao', 'prestacao', 'fornecimento',
+  'servicos', 'obra', 'obras', 'material', 'equipamento', 'sistema',
+  'instalacao', 'manutencao', 'desenvolvimento', 'implementacao',
+  'suporte', 'assistencia', 'consultoria', 'gerenciamento',
+  'execucao', 'elaboracao', 'projeto', 'programa',
+]);
+
 function extrairPalavrasSignificativas(texto: string): string[] {
   return texto
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -35,32 +43,41 @@ function palavraCorresponde(texto: string, palavra: string): boolean {
   return false;
 }
 
-function calcularThreshold(numPalavras: number): number {
-  if (numPalavras <= 2) return 1;
-  if (numPalavras <= 4) return 2;
-  return Math.ceil(numPalavras * 0.4);
-}
-
 function scoringRelevancia(resultados: PNCPResult[], palavrasChave: string[]): PNCPResult[] {
-  if (palavrasChave.length === 0) return resultados;
+  if (palavrasChave.length === 0 || resultados.length === 0) return resultados;
 
-  const comScore = resultados.map(item => {
-    const texto = getTextoObjeto(item);
-    const matches = palavrasChave.filter(p => palavraCorresponde(texto, p)).length;
-    return { item, score: matches };
-  });
+  const N = resultados.length;
 
-  const threshold = calcularThreshold(palavrasChave.length);
-  const filtrados = comScore.filter(r => r.score >= threshold).map(r => r.item);
-
-  if (filtrados.length === 0 && comScore.length > 0) {
-    const maxScore = Math.max(...comScore.map(r => r.score));
-    if (maxScore > 0) {
-      return comScore.filter(r => r.score === maxScore).map(r => r.item);
+  const df: Record<string, number> = {};
+  for (const p of palavrasChave) {
+    df[p] = 0;
+    for (const r of resultados) {
+      if (palavraCorresponde(getTextoObjeto(r), p)) df[p]++;
     }
   }
 
-  return filtrados.length > 0 ? filtrados : resultados;
+  const scored = resultados.map(item => {
+    const texto = getTextoObjeto(item);
+    let score = 0;
+    for (const p of palavrasChave) {
+      if (palavraCorresponde(texto, p)) {
+        const freq = df[p] / N;
+        score += 1 - freq;
+      }
+    }
+    return { item, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+
+  const MIN_RESULTADOS = Math.min(30, resultados.length);
+  const comMatch = scored.filter(r => r.score > 0);
+
+  if (comMatch.length >= MIN_RESULTADOS) {
+    return comMatch.map(r => r.item);
+  }
+
+  return scored.slice(0, MIN_RESULTADOS).map(r => r.item);
 }
 
 export async function GET(req: NextRequest) {
@@ -88,18 +105,36 @@ export async function GET(req: NextRequest) {
 
   const palavrasChave = extrairPalavrasSignificativas(termos[0]);
 
+  // Usar apenas termos específicos para relevância — termos genéricos (locação, aquisição, etc.)
+  // não diferenciam contratos e causam falsos positivos.
+  const palavrasParaRelevancia = palavrasChave.filter(p => !GENERIC_TERMS.has(p));
+  // Se todos os termos forem genéricos (ex: busca "Locação"), usar tudo
+  const termosEfetivos = palavrasParaRelevancia.length > 0 ? palavrasParaRelevancia : palavrasChave;
+
+  const temEspecificos = palavrasParaRelevancia.length > 0 && palavrasParaRelevancia.length < palavrasChave.length;
+
   const { dataInicial, dataFinal } = getPNCPDateRange();
 
   try {
-    const allResults = await Promise.all(
-      termos.map(async (termo) => {
-        const [contratos, atas] = await Promise.all([
-          buscarContratos(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
-          buscarAtas(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
-        ]);
-        return [...(contratos.results || []), ...(atas.results || [])];
-      })
-    );
+    const buscas = termos.map(async (termo) => {
+      const [contratos, atas] = await Promise.all([
+        buscarContratos(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
+        buscarAtas(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
+      ]);
+      return [...(contratos.results || []), ...(atas.results || [])];
+    });
+
+    if (temEspecificos) {
+      const queryExtra = termosEspecificos.join(' ');
+      buscas.push(
+        Promise.all([
+          buscarContratos(queryExtra, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
+          buscarAtas(queryExtra, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
+        ]).then(([c, a]) => [...(c.results || []), ...(a.results || [])])
+      );
+    }
+
+    const allResults = await Promise.all(buscas);
 
     const merged = allResults.flat().filter((item, index, self) => {
       const key = item.tipo === 'CONTRATO'
@@ -113,7 +148,7 @@ export async function GET(req: NextRequest) {
       });
     });
 
-    const resultados = scoringRelevancia(merged, palavrasChave);
+    const resultados = scoringRelevancia(merged, termosEfetivos);
 
     return NextResponse.json({
       results: resultados,
