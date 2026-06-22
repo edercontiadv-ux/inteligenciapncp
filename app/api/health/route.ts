@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server';
 
-const PNCP_BASE_URL = process.env.PNCP_API_BASE_URL || 'https://pncp.gov.br/api/consulta/v1';
-
 export async function GET() {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 6000);
 
-    const res = await fetch(`${PNCP_BASE_URL}/`, {
-      method: 'HEAD',
-      signal: controller.signal,
-    });
+    // Usa a API de busca textual com um termo simples — endpoint que sabemos que funciona
+    const res = await fetch(
+      'https://pncp.gov.br/api/search/?q=contrato&tipos_documento=contrato&pagina=1&tamanhoPagina=1',
+      { signal: controller.signal }
+    );
 
     clearTimeout(timeout);
 

@@ -108,33 +108,21 @@ export async function GET(req: NextRequest) {
   // Usar apenas termos específicos para relevância — termos genéricos (locação, aquisição, etc.)
   // não diferenciam contratos e causam falsos positivos.
   const palavrasParaRelevancia = palavrasChave.filter(p => !GENERIC_TERMS.has(p));
-  // Se todos os termos forem genéricos (ex: busca "Locação"), usar tudo
+  // Se todos os termos forem genéricos (ex: busca "Locação"), usar tudo sem filtrar
   const termosEfetivos = palavrasParaRelevancia.length > 0 ? palavrasParaRelevancia : palavrasChave;
-
-  const temEspecificos = palavrasParaRelevancia.length > 0 && palavrasParaRelevancia.length < palavrasChave.length;
 
   const { dataInicial, dataFinal } = getPNCPDateRange();
 
   try {
-    const buscas = termos.map(async (termo) => {
-      const [contratos, atas] = await Promise.all([
-        buscarContratos(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
-        buscarAtas(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
-      ]);
-      return [...(contratos.results || []), ...(atas.results || [])];
-    });
-
-    if (temEspecificos) {
-      const queryExtra = termosEspecificos.join(' ');
-      buscas.push(
-        Promise.all([
-          buscarContratos(queryExtra, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
-          buscarAtas(queryExtra, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
-        ]).then(([c, a]) => [...(c.results || []), ...(a.results || [])])
-      );
-    }
-
-    const allResults = await Promise.all(buscas);
+    const allResults = await Promise.all(
+      termos.map(async (termo) => {
+        const [contratos, atas] = await Promise.all([
+          buscarContratos(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
+          buscarAtas(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
+        ]);
+        return [...(contratos.results || []), ...(atas.results || [])];
+      })
+    );
 
     const merged = allResults.flat().filter((item, index, self) => {
       const key = item.tipo === 'CONTRATO'
