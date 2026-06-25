@@ -13,6 +13,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jaPesquisou, setJaPesquisou] = useState(false);
+  const [sugestoes, setSugestoes] = useState<string[] | undefined>(undefined);
   const abortRef = useRef<AbortController | null>(null);
 
   const handleSearch = async (termos: string[]) => {
@@ -37,6 +38,7 @@ export default function Home() {
       }
       const data = await res.json();
       setResults(data.results || []);
+      setSugestoes(data.sugestoes);
     } catch (err: any) {
       if (err.name === 'AbortError') return;
       setError('Não foi possível realizar a busca. Verifique sua conexão ou tente novamente mais tarde.');
@@ -105,6 +107,19 @@ export default function Home() {
           <p className="font-body text-sm text-brand-navy/50 max-w-md text-center">
             A busca considera apenas contratos e atas dos últimos 12 meses. Tente descrever o objeto de forma diferente ou use termos mais genéricos.
           </p>
+          {sugestoes && sugestoes.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-2 justify-center">
+              {sugestoes.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSearch([s])}
+                  className="px-4 py-2 rounded-full border border-brand-gold/40 text-sm text-brand-navy hover:bg-brand-gold/10 transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       ) : results.length > 0 ? (
         <div className="space-y-6 animate-fade-up" role="status" aria-live="polite">

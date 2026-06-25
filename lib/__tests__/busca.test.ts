@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extrairPalavrasSignificativas, getTextoObjeto, palavraCorresponde, scoringRelevancia } from '@/app/api/buscar/route';
+import { extrairPalavrasSignificativas, getTextoObjeto, palavraCorresponde, scoringRelevancia } from '@/lib/busca';
 
 describe('extrairPalavrasSignificativas', () => {
   it('should extract meaningful words, removing stopwords and short words', () => {
