@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { buscarContratos, buscarAtas, sanitizarInput, PNCPResult } from '@/lib/pncp-api';
 import { getPNCPDateRange } from '@/lib/date-utils';
 import { checkRateLimit } from '@/lib/rate-limiter';
+import { authenticate, unauthorized } from '@/lib/auth';
 
 const STOPWORDS = new Set([
   'para', 'com', 'sem', 'dos', 'das', 'uma', 'estao', 'serao', 'deve',
@@ -81,6 +82,9 @@ function scoringRelevancia(resultados: PNCPResult[], palavrasChave: string[]): P
 }
 
 export async function GET(req: NextRequest) {
+  const payload = await authenticate(req);
+  if (!payload) return unauthorized();
+
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const rateLimit = await checkRateLimit(ip);
   
