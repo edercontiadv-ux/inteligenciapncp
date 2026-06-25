@@ -83,7 +83,15 @@ Objetivo: garantir que o que está configurado para publicação corresponda à 
 - **Problema:** versions/v1, v2, v3, app.py, scratch/ e a pasta awesome-claude-skills-master aumentam o peso do repositório e geram confusão sobre qual é a versão ativa.
 - **Ação:** mover tudo isso para um repositório separado de arquivo histórico (ou um branch legacy-streamlit isolado), mantendo o repositório principal apenas com o Next.js.
 
-**Critério de avanço:** deploy de staging servindo a aplicação correta; decisão sobre legado documentada (mesmo que a execução completa fique para a Fase 6).
+**2.4 Prevenir pausa do Supabase gratuito (keep-alive automático)**
+
+- **Problema:** o projeto usa o tier gratuito do Supabase, que pausa o banco de dados após **7 dias de inatividade** (sem queries). Isso faz com que a primeira requisição do dia (ou da semana) leve 10–30 segundos enquanto o banco "acorda" — e, em alguns cenários, a requisição simplesmente falha por timeout.
+- **Solução implementada:** GitHub Action `.github/workflows/keep-alive.yml` que faz uma requisição ao endpoint `/api/health` diariamente às 06:00 UTC (03:00 BRT), simulando atividade no banco e impedindo a pausa.
+- **Ação:** ativar o GitHub Action no repositório (aparece automaticamente na aba "Actions" do GitHub após o push). Validar manualmente nos primeiros 3 dias que o workflow está executando e retornando HTTP 200.
+- **Alternativa (se não usar GitHub Actions):** usar cron-job.org gratuito configurado para pingar `https://inteligenciapncp.web.app/api/health` a cada 24h.
+- **Nota:** o endpoint `/api/health` já existe (`app/api/health/route.ts`) e faz uma query leve ao PNCP — não ao banco. Para garantir que o Supabase não pause, o ideal é que a health check também faça uma query mínima no banco (ex.: `SELECT 1`). Se o keep-alive não for suficiente com o endpoint atual, adicionar uma query ao banco no health check.
+
+**Critério de avanço:** deploy de staging servindo a aplicação correta; decisão sobre legado documentada (mesmo que a execução completa fique para a Fase 6); keep-alive validado com 3 execuções consecutivas bem-sucedidas na aba Actions do GitHub.
 
 -----
 **Fase 3 — Performance e sistema de temas (🟡 Risco médio)**
@@ -171,6 +179,7 @@ Feita por último de propósito: limpar o repositório não deve ser misturado c
 |0|Preparação|🟢|—|
 |1|Correções funcionais críticas|🔴|—|
 |2|Infraestrutura e deploy|🟡|Fase 3 (após Fase 1 concluída)|
+|2.4|Keep-alive Supabase (GitHub Action)|🟢|Dentro da Fase 2|
 |3|Performance e temas|🟡|Fase 2|
 |4|Funcionalidades premium na tela|🟡|— (depende da Fase 1.1 e 1.2 estarem corretas)|
 |5|Polimento visual e de marca|🟢|Fase 4|
