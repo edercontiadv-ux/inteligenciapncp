@@ -4,6 +4,7 @@ import { PNCPResult } from '@/lib/pncp-api';
 import { FileDown } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { calcularEstatisticas } from '@/lib/estatisticas';
 
 interface RelatorioExportProps {
   selectedResults: PNCPResult[];
@@ -38,7 +39,6 @@ export default function RelatorioExport({ selectedResults, termoBusca }: Relator
       body: tableData,
     });
 
-    const { calcularEstatisticas } = require('@/lib/estatisticas');
     const stats = calcularEstatisticas(selectedResults);
 
     const finalY = (doc as any).lastAutoTable?.cursor?.y ? (doc as any).lastAutoTable.cursor.y + 10 : 50;
