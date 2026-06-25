@@ -18,7 +18,7 @@ const GENERIC_TERMS = new Set([
   'execucao', 'elaboracao', 'projeto', 'programa',
 ]);
 
-function extrairPalavrasSignificativas(texto: string): string[] {
+export function extrairPalavrasSignificativas(texto: string): string[] {
   return texto
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
@@ -29,13 +29,13 @@ function extrairPalavrasSignificativas(texto: string): string[] {
     .filter(p => !STOPWORDS.has(p));
 }
 
-function getTextoObjeto(item: PNCPResult): string {
+export function getTextoObjeto(item: PNCPResult): string {
   return ((item.objetoContrato || '') + ' ' + (item.objetoAta || ''))
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 }
 
-function palavraCorresponde(texto: string, palavra: string): boolean {
+export function palavraCorresponde(texto: string, palavra: string): boolean {
   if (texto.includes(palavra)) return true;
   if (palavra.length > 5) {
     const stem = palavra.slice(0, 6);
@@ -44,7 +44,7 @@ function palavraCorresponde(texto: string, palavra: string): boolean {
   return false;
 }
 
-function scoringRelevancia(resultados: PNCPResult[], palavrasChave: string[]): PNCPResult[] {
+export function scoringRelevancia(resultados: PNCPResult[], palavrasChave: string[]): PNCPResult[] {
   if (palavrasChave.length === 0 || resultados.length === 0) return resultados;
 
   const N = resultados.length;
