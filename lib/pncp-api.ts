@@ -1,5 +1,5 @@
 const ITENS_POR_PAGINA = 100;
-const PAGINAS_BUSCA = 3; // 3 páginas × 100 itens = até 300 por tipo de documento
+const PAGINAS_BUSCA = 2; // 2 páginas × 100 itens = até 200 por tipo de documento
 
 export interface PNCPResult {
   numeroContrato?: string;

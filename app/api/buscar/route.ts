@@ -105,38 +105,57 @@ export async function GET(req: NextRequest) {
 
   const palavrasChave = extrairPalavrasSignificativas(termos[0]);
 
-  // Usar apenas termos específicos para relevância — termos genéricos (locação, aquisição, etc.)
-  // não diferenciam contratos e causam falsos positivos.
   const palavrasParaRelevancia = palavrasChave.filter(p => !GENERIC_TERMS.has(p));
-  // Se todos os termos forem genéricos (ex: busca "Locação"), usar tudo sem filtrar
   const termosEfetivos = palavrasParaRelevancia.length > 0 ? palavrasParaRelevancia : palavrasChave;
 
+  const temTermosEspecificos = palavrasParaRelevancia.length > 0 && palavrasParaRelevancia.length < palavrasChave.length;
+
   const { dataInicial, dataFinal } = getPNCPDateRange();
+  const inicio = Date.now();
 
   try {
-    const allResults = await Promise.all(
-      termos.map(async (termo) => {
-        const [contratos, atas] = await Promise.all([
-          buscarContratos(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
-          buscarAtas(termo, dataInicial, dataFinal).catch(e => { console.error(e); return { results: [] }; }),
-        ]);
-        return [...(contratos.results || []), ...(atas.results || [])];
-      })
-    );
+    const buscas = termos.map(async (termo) => {
+      const [contratos, atas] = await Promise.all([
+        buscarContratos(termo, dataInicial, dataFinal).catch(() => ({ results: [] as PNCPResult[] })),
+        buscarAtas(termo, dataInicial, dataFinal).catch(() => ({ results: [] as PNCPResult[] })),
+      ]);
+      return [...(contratos.results || []), ...(atas.results || [])];
+    });
 
-    const merged = allResults.flat().filter((item, index, self) => {
+    if (temTermosEspecificos) {
+      const queryExtra = palavrasParaRelevancia.join(' ');
+      buscas.push(
+        Promise.all([
+          buscarContratos(queryExtra, dataInicial, dataFinal).catch(() => ({ results: [] as PNCPResult[] })),
+          buscarAtas(queryExtra, dataInicial, dataFinal).catch(() => ({ results: [] as PNCPResult[] })),
+        ]).then(([c, a]) => [...(c.results || []), ...(a.results || [])])
+      );
+    }
+
+    const allResults = await Promise.all(buscas);
+
+    const seen = new Set<string>();
+    const merged = allResults.flat().filter(item => {
       const key = item.tipo === 'CONTRATO'
         ? `c-${item.numeroContrato}-${item.anoContrato}`
         : `a-${item.numeroAtaRegistroPreco}-${item.anoAta}`;
-      return index === self.findIndex(i => {
-        const k = i.tipo === 'CONTRATO'
-          ? `c-${i.numeroContrato}-${i.anoContrato}`
-          : `a-${i.numeroAtaRegistroPreco}-${i.anoAta}`;
-        return k === key;
-      });
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
 
     const resultados = scoringRelevancia(merged, termosEfetivos);
+
+    const latencia = Date.now() - inicio;
+    console.log(JSON.stringify({
+      nivel: 'INFO',
+      tipo: 'busca',
+      termos: q,
+      termosEfetivos,
+      resultadosBrutos: merged.length,
+      resultadosFinais: resultados.length,
+      latenciaMs: latencia,
+    }));
 
     return NextResponse.json({
       results: resultados,
@@ -144,7 +163,14 @@ export async function GET(req: NextRequest) {
       totalPaginas: 1,
     });
   } catch (error) {
-    console.error('Error in buscar route:', error);
+    const latencia = Date.now() - inicio;
+    console.error(JSON.stringify({
+      nivel: 'ERRO',
+      tipo: 'busca',
+      termos: q,
+      latenciaMs: latencia,
+      erro: error instanceof Error ? error.message : String(error),
+    }));
     return NextResponse.json({ error: 'Erro ao consultar API do PNCP' }, { status: 500 });
   }
 }
