@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 
-function getJwtSecret(): string {
+function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     throw new Error('JWT_SECRET não está definido. Configure a variável de ambiente JWT_SECRET antes de iniciar a aplicação.');
   }
-  return secret;
+  return new TextEncoder().encode(secret);
 }
 
 export interface JwtPayload {
@@ -26,16 +26,16 @@ export async function comparePassword(password: string, hash: string): Promise<b
   return bcrypt.compare(password, hash);
 }
 
-export function signToken(payload: { userId: string; email: string; role: string }): string {
-  return jwt.sign(
-    { sub: payload.userId, email: payload.email, role: payload.role },
-    getJwtSecret(),
-    { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
-  );
+export async function signToken(payload: { userId: string; email: string; role: string }): Promise<string> {
+  return new SignJWT({ sub: payload.userId, email: payload.email, role: payload.role })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime(JWT_EXPIRES_IN)
+    .sign(getJwtSecret());
 }
 
-export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, getJwtSecret()) as JwtPayload;
+export async function verifyToken(token: string): Promise<JwtPayload> {
+  const { payload } = await jwtVerify(token, getJwtSecret());
+  return payload as unknown as JwtPayload;
 }
 
 export function getTokenFromRequest(req: NextRequest): string | null {
@@ -44,11 +44,11 @@ export function getTokenFromRequest(req: NextRequest): string | null {
   return authHeader.slice(7);
 }
 
-export function authenticate(req: NextRequest): JwtPayload | null {
+export async function authenticate(req: NextRequest): Promise<JwtPayload | null> {
   const token = getTokenFromRequest(req);
   if (!token) return null;
   try {
-    return verifyToken(token);
+    return await verifyToken(token);
   } catch {
     return null;
   }

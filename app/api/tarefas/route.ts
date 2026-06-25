@@ -15,7 +15,7 @@ const taskSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const payload = authenticate(req);
+  const payload = await authenticate(req);
   if (!payload) return unauthorized();
 
   const tarefas = await prisma.task.findMany({
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const payload = authenticate(req);
+  const payload = await authenticate(req);
   if (!payload) return unauthorized();
 
   try {
@@ -70,7 +70,7 @@ const taskUpdateSchema = z.object({
 });
 
 export async function PUT(req: NextRequest) {
-  const payload = authenticate(req);
+  const payload = await authenticate(req);
   if (!payload) return unauthorized();
 
   try {
@@ -104,7 +104,7 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const payload = authenticate(req);
+  const payload = await authenticate(req);
   if (!payload) return unauthorized();
 
   const { searchParams } = new URL(req.url);

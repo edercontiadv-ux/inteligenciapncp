@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { authenticate, unauthorized } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
-  const payload = authenticate(req);
+  const payload = await authenticate(req);
   if (!payload) return unauthorized();
 
   const clients = await prisma.client.findMany({
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const payload = authenticate(req);
+  const payload = await authenticate(req);
   if (!payload) return unauthorized();
 
   try {
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const payload = authenticate(req);
+  const payload = await authenticate(req);
   if (!payload) return unauthorized();
 
   try {
@@ -61,7 +61,7 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const payload = authenticate(req);
+  const payload = await authenticate(req);
   if (!payload) return unauthorized();
 
   const { searchParams } = new URL(req.url);

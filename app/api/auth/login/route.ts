@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = signToken({ userId: user.id, email: user.email, role: user.role });
+    const token = await signToken({ userId: user.id, email: user.email, role: user.role });
 
     return NextResponse.json({ success: true, token });
   } catch (error) {
