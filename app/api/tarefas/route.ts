@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { authenticate, unauthorized } from '@/lib/auth';
+
+const taskSchema = z.object({
+  description: z.string().min(1, 'Descrição é obrigatória'),
+  processNumber: z.string().min(1, 'Número do processo é obrigatório'),
+  type: z.string().default('Prazo'),
+  priority: z.enum(['alta', 'media', 'baixa']).default('media'),
+  deadline: z.string().nullable().optional(),
+  responsible: z.string().nullable().optional(),
+  clientId: z.string().nullable().optional(),
+  status: z.enum(['pendente', 'concluida', 'cancelada']).optional(),
+});
 
 export async function GET(req: NextRequest) {
   const payload = authenticate(req);
@@ -21,25 +33,41 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    const parsed = taskSchema.parse(body);
     const tarefa = await prisma.task.create({
       data: {
-        description: body.description,
-        processNumber: body.processNumber,
-        type: body.type || 'Prazo',
-        priority: body.priority || 'media',
-        deadline: body.deadline ? new Date(body.deadline) : null,
-        responsible: body.responsible || null,
-        clientId: body.clientId || null,
+        description: parsed.description,
+        processNumber: parsed.processNumber,
+        type: parsed.type,
+        priority: parsed.priority,
+        deadline: parsed.deadline ? new Date(parsed.deadline) : null,
+        responsible: parsed.responsible || null,
+        clientId: parsed.clientId || null,
         userId: payload.sub,
       },
       include: { client: true },
     });
     return NextResponse.json(tarefa, { status: 201 });
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ error: err.issues[0].message }, { status: 400 });
+    }
     console.error('Erro ao criar tarefa:', err);
     return NextResponse.json({ error: 'Erro ao criar tarefa' }, { status: 500 });
   }
 }
+
+const taskUpdateSchema = z.object({
+  id: z.string().min(1, 'ID é obrigatório'),
+  description: z.string().min(1).optional(),
+  processNumber: z.string().min(1).optional(),
+  type: z.string().optional(),
+  priority: z.enum(['alta', 'media', 'baixa']).optional(),
+  deadline: z.string().nullable().optional(),
+  responsible: z.string().nullable().optional(),
+  clientId: z.string().nullable().optional(),
+  status: z.enum(['pendente', 'concluida', 'cancelada']).optional(),
+});
 
 export async function PUT(req: NextRequest) {
   const payload = authenticate(req);
@@ -47,25 +75,29 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
+    const parsed = taskUpdateSchema.parse(body);
     await prisma.task.updateMany({
-      where: { id: body.id, userId: payload.sub },
+      where: { id: parsed.id, userId: payload.sub },
       data: {
-        description: body.description,
-        processNumber: body.processNumber,
-        type: body.type,
-        priority: body.priority,
-        deadline: body.deadline ? new Date(body.deadline) : null,
-        responsible: body.responsible || null,
-        clientId: body.clientId || null,
-        status: body.status,
+        description: parsed.description,
+        processNumber: parsed.processNumber,
+        type: parsed.type,
+        priority: parsed.priority,
+        deadline: parsed.deadline ? new Date(parsed.deadline) : null,
+        responsible: parsed.responsible || null,
+        clientId: parsed.clientId || null,
+        status: parsed.status,
       },
     });
     const tarefa = await prisma.task.findUnique({
-      where: { id: body.id },
+      where: { id: parsed.id },
       include: { client: true },
     });
     return NextResponse.json(tarefa);
   } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ error: err.issues[0].message }, { status: 400 });
+    }
     console.error('Erro ao atualizar tarefa:', err);
     return NextResponse.json({ error: 'Erro ao atualizar tarefa' }, { status: 500 });
   }

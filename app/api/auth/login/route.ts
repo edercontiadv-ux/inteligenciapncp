@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { comparePassword, signToken } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rate-limiter';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -9,6 +10,16 @@ const loginSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+  const rateLimit = await checkRateLimit(ip);
+  
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: 'Muitas tentativas. Tente novamente em instantes.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json();
     const parsed = loginSchema.safeParse(body);
