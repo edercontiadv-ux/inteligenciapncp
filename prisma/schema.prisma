@@ -31,6 +31,8 @@ model Client {
   tasks Task[]
 
   @@map("clients")
+  @@index([userId], name: "idx_clients_user_id")
+  @@index([userId, name], name: "idx_clients_user_name")
 }
 
 model Task {
@@ -50,6 +52,9 @@ model Task {
   client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
 
   @@map("tasks")
+  @@index([userId], name: "idx_tasks_user_id")
+  @@index([clientId], name: "idx_tasks_client_id")
+  @@index([userId, deadline], name: "idx_tasks_user_deadline")
 }
 
 model RateLimit {
