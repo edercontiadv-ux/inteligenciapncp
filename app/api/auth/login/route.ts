@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { comparePassword, signToken } from '@/lib/auth';
+import { comparePassword, signToken, signRefreshToken } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limiter';
 
 const loginSchema = z.object({
@@ -50,8 +50,9 @@ export async function POST(req: NextRequest) {
     }
 
     const token = await signToken({ userId: user.id, email: user.email, role: user.role });
+    const refreshToken = await signRefreshToken({ userId: user.id, email: user.email, role: user.role });
 
-    return NextResponse.json({ success: true, token });
+    return NextResponse.json({ success: true, token, refreshToken });
   } catch (error) {
     console.error('Error in login:', error);
     return NextResponse.json(

@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
+const REFRESH_EXPIRES_IN = '7d';
 
 function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
@@ -35,6 +36,19 @@ export async function signToken(payload: { userId: string; email: string; role: 
 
 export async function verifyToken(token: string): Promise<JwtPayload> {
   const { payload } = await jwtVerify(token, getJwtSecret());
+  return payload as unknown as JwtPayload;
+}
+
+export async function signRefreshToken(payload: { userId: string; email: string; role: string }): Promise<string> {
+  return new SignJWT({ sub: payload.userId, email: payload.email, role: payload.role, type: 'refresh' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime(REFRESH_EXPIRES_IN)
+    .sign(getJwtSecret());
+}
+
+export async function verifyRefreshToken(token: string): Promise<JwtPayload> {
+  const { payload } = await jwtVerify(token, getJwtSecret());
+  if ((payload as any).type !== 'refresh') throw new Error('Token is not a refresh token');
   return payload as unknown as JwtPayload;
 }
 
