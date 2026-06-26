@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth, authHeaders } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Trash2, Building2 } from 'lucide-react';
 
@@ -15,7 +15,7 @@ interface Client {
 }
 
 export default function OrgaosPage() {
-  const { user, token, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,15 +24,15 @@ export default function OrgaosPage() {
   const [form, setForm] = useState({ name: '', document: '', email: '', phone: '', notes: '' });
 
   useEffect(() => {
-    if (!authLoading && !token) {
+    if (!authLoading && !user) {
       router.push('/login');
       return;
     }
-    if (token) loadClients();
-  }, [token, authLoading]);
+    if (user) loadClients();
+  }, [user, authLoading]);
 
   const loadClients = async () => {
-    const res = await fetch('/api/clientes', { headers: authHeaders(token) });
+    const res = await fetch('/api/clientes');
     if (res.ok) setClients(await res.json());
     setLoading(false);
   };
@@ -46,7 +46,7 @@ export default function OrgaosPage() {
 
     const res = await fetch(url, {
       method,
-      headers: authHeaders(token),
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
@@ -72,7 +72,7 @@ export default function OrgaosPage() {
 
   const deleteClient = async (id: string) => {
     if (!confirm('Excluir este órgão? As tarefas vinculadas perderão a referência.')) return;
-    await fetch(`/api/clientes?id=${id}`, { method: 'DELETE', headers: authHeaders(token) });
+    await fetch(`/api/clientes?id=${id}`, { method: 'DELETE' });
     loadClients();
   };
 

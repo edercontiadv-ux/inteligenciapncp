@@ -2,12 +2,13 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, ClipboardList, Users } from 'lucide-react';
+import { Search, ClipboardList, Users, CreditCard } from 'lucide-react';
 
 const tabs = [
   { href: '/', label: 'Busca', icon: Search },
   { href: '/tarefas', label: 'Tarefas', icon: ClipboardList },
   { href: '/orgaos', label: 'Órgãos', icon: Users },
+  { href: '/planos', label: 'Planos', icon: CreditCard },
 ];
 
 export default function NavigationTabs() {

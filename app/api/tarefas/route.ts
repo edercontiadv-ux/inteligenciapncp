@@ -33,25 +33,26 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const parsed = taskSchema.parse(body);
+    const parsed = taskSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    }
+    const data = parsed.data;
     const tarefa = await prisma.task.create({
       data: {
-        description: parsed.description,
-        processNumber: parsed.processNumber,
-        type: parsed.type,
-        priority: parsed.priority,
-        deadline: parsed.deadline ? new Date(parsed.deadline) : null,
-        responsible: parsed.responsible || null,
-        clientId: parsed.clientId || null,
+        description: data.description,
+        processNumber: data.processNumber,
+        type: data.type,
+        priority: data.priority,
+        deadline: data.deadline ? new Date(data.deadline) : null,
+        responsible: data.responsible || null,
+        clientId: data.clientId || null,
         userId: payload.sub,
       },
       include: { client: true },
     });
     return NextResponse.json(tarefa, { status: 201 });
   } catch (err) {
-    if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: err.issues[0].message }, { status: 400 });
-    }
     console.error('Erro ao criar tarefa:', err);
     return NextResponse.json({ error: 'Erro ao criar tarefa' }, { status: 500 });
   }
@@ -75,29 +76,30 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const parsed = taskUpdateSchema.parse(body);
+    const parsed = taskUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    }
+    const data = parsed.data;
     await prisma.task.updateMany({
-      where: { id: parsed.id, userId: payload.sub },
+      where: { id: data.id, userId: payload.sub },
       data: {
-        description: parsed.description,
-        processNumber: parsed.processNumber,
-        type: parsed.type,
-        priority: parsed.priority,
-        deadline: parsed.deadline ? new Date(parsed.deadline) : null,
-        responsible: parsed.responsible || null,
-        clientId: parsed.clientId || null,
-        status: parsed.status,
+        description: data.description,
+        processNumber: data.processNumber,
+        type: data.type,
+        priority: data.priority,
+        deadline: data.deadline ? new Date(data.deadline) : null,
+        responsible: data.responsible || null,
+        clientId: data.clientId || null,
+        status: data.status,
       },
     });
     const tarefa = await prisma.task.findUnique({
-      where: { id: parsed.id },
+      where: { id: data.id },
       include: { client: true },
     });
     return NextResponse.json(tarefa);
   } catch (err) {
-    if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: err.issues[0].message }, { status: 400 });
-    }
     console.error('Erro ao atualizar tarefa:', err);
     return NextResponse.json({ error: 'Erro ao atualizar tarefa' }, { status: 500 });
   }

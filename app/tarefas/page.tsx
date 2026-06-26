@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth, authHeaders } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { Plus, Circle, CheckCircle2, Clock, AlertTriangle, Trash2, User } from 'lucide-react';
 
@@ -25,7 +25,7 @@ interface Task {
 }
 
 export default function TarefasPage() {
-  const { user, token, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -42,21 +42,21 @@ export default function TarefasPage() {
   });
 
   useEffect(() => {
-    if (!authLoading && !token) {
+    if (!authLoading && !user) {
       router.push('/login');
       return;
     }
-    if (token) {
+    if (user) {
       loadData();
     }
-  }, [token, authLoading]);
+  }, [user, authLoading]);
 
   const loadData = async () => {
     setLoading(true);
     try {
       const [tasksRes, clientsRes] = await Promise.all([
-        fetch('/api/tarefas', { headers: authHeaders(token) }),
-        fetch('/api/clientes', { headers: authHeaders(token) }),
+        fetch('/api/tarefas'),
+        fetch('/api/clientes'),
       ]);
       if (tasksRes.ok) setTasks(await tasksRes.json());
       if (clientsRes.ok) setClients(await clientsRes.json());
@@ -72,7 +72,7 @@ export default function TarefasPage() {
     try {
       const res = await fetch('/api/tarefas', {
         method: 'POST',
-        headers: authHeaders(token),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
           deadline: form.deadline || null,
@@ -92,10 +92,7 @@ export default function TarefasPage() {
   const deleteTask = async (id: string) => {
     if (!confirm('Excluir esta tarefa?')) return;
     try {
-      await fetch(`/api/tarefas?id=${id}`, {
-        method: 'DELETE',
-        headers: authHeaders(token),
-      });
+      await fetch(`/api/tarefas?id=${id}`, { method: 'DELETE' });
       setTasks(prev => prev.filter(t => t.id !== id));
     } catch (err) {
       console.error(err);
@@ -107,7 +104,7 @@ export default function TarefasPage() {
     try {
       await fetch('/api/tarefas', {
         method: 'PUT',
-        headers: authHeaders(token),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...task, id: task.id, status: newStatus, deadline: task.deadline || null }),
       });
       setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: newStatus } : t));

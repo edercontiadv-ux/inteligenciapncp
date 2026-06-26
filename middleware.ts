@@ -11,14 +11,23 @@ function getJwtSecret(): Uint8Array {
 
 const protectedRoutes = ['/profile', '/dashboard', '/api/projects'];
 
+function getToken(req: NextRequest): string | null {
+  const fromCookie = req.cookies.get('inteligencia-pncp-token')?.value;
+  if (fromCookie) return fromCookie;
+
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  return authHeader.slice(7);
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const isProtected = protectedRoutes.some(route => pathname.startsWith(route));
   if (!isProtected) return NextResponse.next();
 
-  const authHeader = req.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
+  const token = getToken(req);
+  if (!token) {
     return NextResponse.json(
       { success: false, message: 'Invalid credentials' },
       { status: 401 }
@@ -26,7 +35,6 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
-    const token = authHeader.slice(7);
     const { payload } = await jwtVerify(token, getJwtSecret());
 
     const requestHeaders = new Headers(req.headers);

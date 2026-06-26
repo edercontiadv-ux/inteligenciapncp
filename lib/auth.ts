@@ -53,9 +53,16 @@ export async function verifyRefreshToken(token: string): Promise<JwtPayload> {
 }
 
 export function getTokenFromRequest(req: NextRequest): string | null {
+  const fromCookie = req.cookies.get('inteligencia-pncp-token')?.value;
+  if (fromCookie) return fromCookie;
+
   const authHeader = req.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
   return authHeader.slice(7);
+}
+
+export function getRefreshTokenFromRequest(req: NextRequest): string | null {
+  return req.cookies.get('inteligencia-pncp-refresh')?.value || null;
 }
 
 export async function authenticate(req: NextRequest): Promise<JwtPayload | null> {
@@ -66,6 +73,44 @@ export async function authenticate(req: NextRequest): Promise<JwtPayload | null>
   } catch {
     return null;
   }
+}
+
+export function setAuthCookies(res: NextResponse, accessToken: string, refreshToken: string): void {
+  const isSecure = process.env.NODE_ENV === 'production';
+
+  res.cookies.set('inteligencia-pncp-token', accessToken, {
+    httpOnly: true,
+    secure: isSecure,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 15,
+  });
+
+  res.cookies.set('inteligencia-pncp-refresh', refreshToken, {
+    httpOnly: true,
+    secure: isSecure,
+    sameSite: 'lax',
+    path: '/api/auth',
+    maxAge: 60 * 60 * 24 * 7,
+  });
+}
+
+export function clearAuthCookies(res: NextResponse): void {
+  res.cookies.set('inteligencia-pncp-token', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
+
+  res.cookies.set('inteligencia-pncp-refresh', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/api/auth',
+    maxAge: 0,
+  });
 }
 
 export function unauthorized(): NextResponse {

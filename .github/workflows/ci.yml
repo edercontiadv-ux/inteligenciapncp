@@ -19,3 +19,6 @@ jobs:
       - run: npx next lint --no-cache
       - run: npm test
       - run: npm run build
+      - name: Apply Prisma migrations
+        if: github.ref == 'refs/heads/main' && env.DATABASE_URL != ''
+        run: npx prisma migrate deploy

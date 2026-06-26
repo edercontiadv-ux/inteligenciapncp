@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { authenticate, unauthorized } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
-  const userId = req.headers.get('x-user-id');
-  if (!userId) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid credentials' },
-      { status: 401 }
-    );
-  }
+  const payload = await authenticate(req);
+  if (!payload) return unauthorized();
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: payload.sub },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
 

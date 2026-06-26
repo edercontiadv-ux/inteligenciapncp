@@ -1,11 +1,19 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import FormBusca from '@/components/FormBusca';
 import PainelResultados from '@/components/PainelResultados';
 import SkeletonCard from '@/components/SkeletonCard';
 import { PNCPResult } from '@/lib/pncp-api';
-import { SearchX, Scale, TrendingDown } from 'lucide-react';
+import { SearchX, Scale, TrendingDown, Search, FileText, BarChart3 } from 'lucide-react';
+
+type EtapaBusca = 'preparando' | 'consultando' | 'processando' | null;
+
+const ETAPAS: { key: EtapaBusca; label: string; icon: typeof Search }[] = [
+  { key: 'preparando', label: 'Extraindo termos de busca...', icon: Search },
+  { key: 'consultando', label: 'Consultando PNCP (últimos 12 meses)...', icon: FileText },
+  { key: 'processando', label: 'Processando resultados...', icon: BarChart3 },
+];
 
 export default function Home() {
   const [results, setResults] = useState<PNCPResult[]>([]);
@@ -14,18 +22,30 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [jaPesquisou, setJaPesquisou] = useState(false);
   const [sugestoes, setSugestoes] = useState<string[] | undefined>(undefined);
+  const [etapa, setEtapa] = useState<EtapaBusca>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const etapaTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    return () => etapaTimers.current.forEach(clearTimeout);
+  }, []);
 
   const handleSearch = async (termos: string[]) => {
-    if (abortRef.current) {
-      abortRef.current.abort();
-    }
+    if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
 
     setIsLoading(true);
     setError(null);
     setJaPesquisou(true);
     setTermoBusca(termos.join(', '));
+    setResults([]);
+    setEtapa('preparando');
+
+    etapaTimers.current.forEach(clearTimeout);
+    etapaTimers.current = [
+      setTimeout(() => setEtapa('consultando'), 800),
+      setTimeout(() => setEtapa('processando'), 3000),
+    ];
 
     try {
       const q = termos.join(',');
@@ -45,12 +65,14 @@ export default function Home() {
       console.error(err);
     } finally {
       setIsLoading(false);
+      setEtapa(null);
     }
   };
 
+  const etapaAtualIndex = ETAPAS.findIndex(e => e.key === etapa);
+
   return (
     <div className="space-y-10 animate-fade-in">
-      {/* Hero section */}
       <section className="relative">
         <div className="max-w-2xl">
           <div className="flex items-center gap-3 mb-4">
@@ -81,18 +103,37 @@ export default function Home() {
             <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0">
               <SearchX className="w-4 h-4 text-red-500" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="font-body text-sm font-medium text-red-800">Erro na consulta</p>
               <p className="font-body text-sm text-red-600 mt-0.5">{error}</p>
+              {error.includes('indisponível') && (
+                <button
+                  onClick={() => handleSearch(termoBusca.split(', '))}
+                  className="mt-3 px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 transition-colors"
+                >
+                  Tentar novamente
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {isLoading ? (
+      {isLoading && etapa ? (
         <div className="space-y-6 animate-fade-in">
-          <div className="text-center">
-            <p className="font-body text-sm text-brand-navy/60">Consultando PNCP (últimos 12 meses)...</p>
+          <div className="max-w-md mx-auto space-y-4">
+            {ETAPAS.map((e, i) => {
+              const isActive = i === etapaAtualIndex;
+              const isDone = i < etapaAtualIndex;
+              return (
+                <div key={e.key} className={`flex items-center gap-3 transition-opacity ${isDone ? 'opacity-40' : isActive ? 'opacity-100' : 'opacity-20'}`}>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${isDone ? 'bg-green-100' : isActive ? 'bg-brand-navy' : 'bg-brand-sand/30'}`}>
+                    <e.icon className={`w-3.5 h-3.5 ${isDone ? 'text-green-600' : isActive ? 'text-white' : 'text-brand-navy/30'}`} />
+                  </div>
+                  <span className={`font-body text-sm ${isActive ? 'text-brand-navy font-medium' : 'text-brand-navy/50'}`}>{e.label}</span>
+                </div>
+              );
+            })}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}

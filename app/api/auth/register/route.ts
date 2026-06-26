@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { hashPassword, signToken, signRefreshToken } from '@/lib/auth';
+import { hashPassword, signToken, signRefreshToken, setAuthCookies } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limiter';
 
 const registerSchema = z.object({
@@ -48,10 +48,29 @@ export async function POST(req: NextRequest) {
       data: { name, email, passwordHash },
     });
 
+    const freePlan = await prisma.plan.findUnique({ where: { slug: 'free-trial' } });
+    if (freePlan) {
+      await prisma.subscription.create({
+        data: {
+          userId: user.id,
+          planId: freePlan.id,
+          status: 'trial',
+          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      });
+    }
+
     const token = await signToken({ userId: user.id, email: user.email, role: user.role });
     const refreshToken = await signRefreshToken({ userId: user.id, email: user.email, role: user.role });
 
-    return NextResponse.json({ success: true, token, refreshToken }, { status: 201 });
+    const res = NextResponse.json({
+      success: true,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    }, { status: 201 });
+
+    setAuthCookies(res, token, refreshToken);
+
+    return res;
   } catch (error) {
     console.error('Error in register:', error);
     return NextResponse.json(

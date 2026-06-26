@@ -14,7 +14,21 @@ model User {
   role         String   @default("user")
   createdAt    DateTime @default(now()) @map("created_at")
 
+  clients       Client[]
+  tasks         Task[]
+  subscriptions Subscription[]
+  searchLogs    SearchLog[]
+
   @@map("users")
+}
+
+model RefreshTokenBlacklist {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("refresh_token_blacklist")
 }
 
 model Client {
@@ -29,6 +43,7 @@ model Client {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   tasks Task[]
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("clients")
   @@index([userId], name: "idx_clients_user_id")
@@ -50,6 +65,7 @@ model Task {
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("tasks")
   @@index([userId], name: "idx_tasks_user_id")
@@ -57,12 +73,52 @@ model Task {
   @@index([userId, deadline], name: "idx_tasks_user_deadline")
 }
 
-model RateLimit {
-  id        String   @id @default(uuid())
-  key       String   @unique
-  count     Int      @default(1)
-  resetAt   DateTime
-  createdAt DateTime @default(now())
+model Plan {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  priceCents  Int      @map("price_cents")
+  maxUsers    Int      @default(1) @map("max_users")
+  maxClients  Int      @default(-1) @map("max_clients")
+  maxSearches Int      @default(20) @map("max_searches")
+  features    String[]
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  @@map("rate_limits")
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                    String    @id @default(uuid())
+  userId                String    @map("user_id")
+  planId                String    @map("plan_id")
+  status                String    @default("trial")
+  trialEndsAt           DateTime? @map("trial_ends_at")
+  currentPeriodEndsAt   DateTime? @map("current_period_ends_at")
+  stripeSubscriptionId  String?   @unique @map("stripe_subscription_id")
+  stripeCustomerId      String?   @map("stripe_customer_id")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
+  @@index([userId])
+  @@index([planId])
+}
+
+model SearchLog {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  query     String
+  results   Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("search_logs")
+  @@index([userId, createdAt])
 }

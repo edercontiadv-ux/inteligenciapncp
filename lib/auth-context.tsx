@@ -6,50 +6,50 @@ interface User {
   id: string;
   name: string;
   email: string;
+  role?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  token: null,
   isLoading: true,
   login: async () => {},
   register: async () => {},
-  logout: () => {},
+  logout: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('inteligencia-pncp-token');
-    if (stored) {
-      setToken(stored);
-      fetch('/api/profile', {
-        headers: { Authorization: `Bearer ${stored}` },
+    fetch('/api/profile')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.user) {
+          setUser(data.user);
+        }
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.email) {
-            setUser({ id: data.id, name: data.name, email: data.email });
-          }
-        })
-        .catch(() => localStorage.removeItem('inteligencia-pncp-token'))
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(async () => {
+      try {
+        await fetch('/api/auth/refresh', { method: 'POST' });
+      } catch {}
+    }, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch('/api/auth/login', {
@@ -59,12 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
-    localStorage.setItem('inteligencia-pncp-token', data.token);
-    setToken(data.token);
-    const profile = await fetch('/api/profile', {
-      headers: { Authorization: `Bearer ${data.token}` },
-    }).then(r => r.json());
-    setUser({ id: profile.id, name: profile.name, email: profile.email });
+    if (data.user) setUser(data.user);
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
@@ -75,19 +70,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
-    localStorage.setItem('inteligencia-pncp-token', data.token);
-    setToken(data.token);
-    setUser({ id: '', name, email });
+    if (data.user) setUser(data.user);
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('inteligencia-pncp-token');
-    setToken(null);
+  const logout = useCallback(async () => {
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -97,7 +89,6 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function authHeaders(token: string | null): Record<string, string> {
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+export function authHeaders(): Record<string, string> {
+  return { 'Content-Type': 'application/json' };
 }
