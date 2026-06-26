@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import PNCPStatusIndicator from '@/components/PNCPStatusIndicator';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
@@ -9,6 +9,7 @@ import NavigationTabs from '@/components/NavigationTabs';
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
   const isLanding = pathname === '/';
   const isLogin = pathname.startsWith('/login');
@@ -17,7 +18,10 @@ export default function Header() {
   return (
     <header className="relative z-10 border-b border-brand-sand/30 bg-white/80 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => router.push(user ? '/busca' : '/')}
+          className="flex items-center gap-3 text-left"
+        >
           <div className="w-10 h-10 rounded-lg bg-brand-navy flex items-center justify-center">
             <span className="text-brand-gold font-heading text-lg italic">P</span>
           </div>
@@ -29,7 +33,7 @@ export default function Header() {
               Pesquisa de Preços
             </span>
           </div>
-        </div>
+        </button>
         <div className="flex items-center gap-4">
           {showAppNav && <PNCPStatusIndicator />}
           <ThemeSwitcher />
