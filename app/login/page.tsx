@@ -1,35 +1,81 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { Scale } from 'lucide-react';
+import { Scale, Mail, Phone, Lock, User, ArrowLeft, RefreshCw } from 'lucide-react';
+
+type Etapa = 'login' | 'register' | 'verify';
 
 export default function LoginPage() {
-  const { login, register } = useAuth();
+  const { login, register, verifyEmail, resendCode } = useAuth();
   const router = useRouter();
-  const [isRegister, setIsRegister] = useState(false);
+  const [etapa, setEtapa] = useState<Etapa>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const resendTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      if (isRegister) {
-        await register(name, email, password);
-      } else {
-        await login(email, password);
-      }
-      router.push('/tarefas');
+      const result = await register(name, email, phone, password);
+      setEmail(result.email);
+      setCodeSent(true);
+      setEtapa('verify');
     } catch (err: any) {
-      setError(err.message || 'Erro ao autenticar');
+      setError(err.message || 'Erro ao cadastrar');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await login(email, password);
+      router.push('/tarefas');
+    } catch (err: any) {
+      if (err.message?.includes('Confirme seu e-mail')) {
+        setEtapa('verify');
+      } else {
+        setError(err.message || 'Erro ao autenticar');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      await verifyEmail(email, code);
+      router.push('/account');
+    } catch (err: any) {
+      setError(err.message || 'Código inválido');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError('');
+    try {
+      await resendCode(email);
+      setCodeSent(true);
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -41,77 +87,136 @@ export default function LoginPage() {
             <Scale className="w-7 h-7 text-brand-navy" />
           </div>
           <h2 className="font-heading text-2xl text-brand-navy mb-1">
-            {isRegister ? 'Criar Conta' : 'Entrar'}
+            {etapa === 'verify' ? 'Confirme seu e-mail' : etapa === 'register' ? 'Criar Conta' : 'Entrar'}
           </h2>
           <p className="font-body text-sm text-brand-navy/50">
-            {isRegister ? 'Crie sua conta para gerenciar tarefas' : 'Acesse sua conta para gerenciar tarefas'}
+            {etapa === 'verify'
+              ? `Enviamos um código para ${email}`
+              : etapa === 'register'
+              ? 'Preencha seus dados para começar'
+              : 'Acesse sua conta'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isRegister && (
+        {etapa === 'verify' ? (
+          <form onSubmit={handleVerify} className="space-y-4">
+            <div className="bg-brand-gold/5 border border-brand-gold/20 rounded-xl p-4 text-center">
+              <p className="font-body text-sm text-brand-navy/70 mb-1">Digite o código de 6 dígitos</p>
+              <p className="font-body text-xs text-brand-navy/40">Enviado para {email}</p>
+            </div>
+
             <div>
-              <label htmlFor="name" className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">
-                Nome
-              </label>
               <input
-                id="name"
                 type="text"
-                className="input-field"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                inputMode="numeric"
+                maxLength={6}
+                className="input-field text-center text-2xl tracking-[8px] font-mono"
+                placeholder="000000"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                 required
               />
             </div>
-          )}
 
-          <div>
-            <label htmlFor="email" className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">
-              E-mail
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="input-field"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+            <button type="submit" disabled={loading || code.length !== 6} className="btn-primary w-full justify-center">
+              {loading ? 'Verificando...' : 'Confirmar e-mail'}
+            </button>
 
-          <div>
-            <label htmlFor="password" className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">
-              Senha
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="input-field"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
+            <button
+              type="button"
+              onClick={handleResend}
+              className="w-full flex items-center justify-center gap-2 text-sm text-brand-navy/50 hover:text-brand-navy font-body"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Reenviar código
+            </button>
 
-          {error && (
-            <p className="text-red-500 text-sm font-body">{error}</p>
-          )}
+            <button
+              type="button"
+              onClick={() => { setEtapa('login'); setError(''); }}
+              className="w-full flex items-center justify-center gap-2 text-sm text-brand-navy/50 hover:text-brand-navy font-body"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Voltar ao login
+            </button>
 
-          <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
-            {loading ? 'Aguarde...' : isRegister ? 'Criar Conta' : 'Entrar'}
-          </button>
-        </form>
+            {error && <p className="text-red-500 text-sm font-body text-center">{error}</p>}
+          </form>
+        ) : etapa === 'register' ? (
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div>
+              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Nome completo</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
+                <input type="text" className="input-field pl-10" placeholder="Seu nome" value={name} onChange={e => setName(e.target.value)} required />
+              </div>
+            </div>
+            <div>
+              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">E-mail</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
+                <input type="email" className="input-field pl-10" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
+              </div>
+            </div>
+            <div>
+              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Telefone</label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
+                <input type="tel" className="input-field pl-10" placeholder="(11) 99999-9999" value={phone} onChange={e => setPhone(e.target.value)} required />
+              </div>
+            </div>
+            <div>
+              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Senha</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
+                <input type="password" className="input-field pl-10" placeholder="Mínimo 6 caracteres" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+              </div>
+            </div>
 
-        <p className="text-center mt-6 font-body text-sm text-brand-navy/50">
-          {isRegister ? 'Já tem conta?' : 'Não tem conta?'}{' '}
-          <button
-            onClick={() => { setIsRegister(!isRegister); setError(''); }}
-            className="text-brand-navy font-medium hover:underline"
-          >
-            {isRegister ? 'Entrar' : 'Cadastre-se'}
-          </button>
-        </p>
+            <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
+              {loading ? 'Cadastrando...' : 'Criar Conta'}
+            </button>
+
+            <p className="text-center font-body text-sm text-brand-navy/50">
+              Já tem conta?{' '}
+              <button type="button" onClick={() => { setEtapa('login'); setError(''); }} className="text-brand-navy font-medium hover:underline">
+                Entrar
+              </button>
+            </p>
+
+            {error && <p className="text-red-500 text-sm font-body">{error}</p>}
+          </form>
+        ) : (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">E-mail</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
+                <input type="email" className="input-field pl-10" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
+              </div>
+            </div>
+            <div>
+              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Senha</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
+                <input type="password" className="input-field pl-10" placeholder="Sua senha" value={password} onChange={e => setPassword(e.target.value)} required />
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
+              {loading ? 'Entrando...' : 'Entrar'}
+            </button>
+
+            <p className="text-center font-body text-sm text-brand-navy/50">
+              Não tem conta?{' '}
+              <button type="button" onClick={() => { setEtapa('register'); setError(''); }} className="text-brand-navy font-medium hover:underline">
+                Cadastre-se grátis
+              </button>
+            </p>
+
+            {error && <p className="text-red-500 text-sm font-body">{error}</p>}
+          </form>
+        )}
       </div>
     </div>
   );

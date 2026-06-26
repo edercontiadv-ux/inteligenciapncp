@@ -1,21 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { hashPassword } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { sendVerificationEmail, generateVerificationCode } from '@/lib/email';
 
-const registerSchema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
+const resendSchema = z.object({
   email: z.string().email('E-mail inválido'),
-  phone: z.string().regex(/^[\d\s\-()]{8,20}$/, 'Telefone inválido').optional().or(z.literal('')),
-  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
 });
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const rateLimit = await checkRateLimit(ip);
-  
+
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { success: false, message: 'Muitas tentativas. Tente novamente em instantes.' },
@@ -25,7 +21,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const parsed = registerSchema.safeParse(body);
+    const parsed = resendSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -34,21 +30,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, phone, password } = parsed.data;
+    const { email } = parsed.data;
 
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
       return NextResponse.json(
-        { success: false, message: 'E-mail já cadastrado' },
-        { status: 409 }
+        { success: false, message: 'Usuário não encontrado' },
+        { status: 404 }
       );
     }
 
-    const passwordHash = await hashPassword(password);
+    if (user.emailVerifiedAt) {
+      return NextResponse.json(
+        { success: false, message: 'E-mail já verificado' },
+        { status: 400 }
+      );
+    }
 
-    await prisma.user.create({
-      data: { name, email, phone: phone || null, passwordHash },
+    const recent = await prisma.verificationCode.findFirst({
+      where: { email, type: 'email_verification', createdAt: { gte: new Date(Date.now() - 60 * 1000) } },
     });
+    if (recent) {
+      return NextResponse.json(
+        { success: false, message: 'Aguarde 1 minuto antes de solicitar um novo código.' },
+        { status: 429 }
+      );
+    }
 
     const code = generateVerificationCode();
     await prisma.verificationCode.create({
@@ -62,13 +69,9 @@ export async function POST(req: NextRequest) {
 
     await sendVerificationEmail(email, code);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Cadastro realizado! Verifique seu e-mail para confirmar.',
-      email,
-    }, { status: 201 });
+    return NextResponse.json({ success: true, message: 'Código reenviado!' });
   } catch (error) {
-    console.error('Error in register:', error);
+    console.error('Error in resend-code:', error);
     return NextResponse.json(
       { success: false, message: 'Erro interno do servidor' },
       { status: 500 }

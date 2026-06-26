@@ -49,6 +49,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!user.emailVerifiedAt) {
+      return NextResponse.json({
+        success: false,
+        message: 'Confirme seu e-mail antes de acessar.',
+        needsVerification: true,
+        email: user.email,
+      }, { status: 403 });
+    }
+
     const token = await signToken({ userId: user.id, email: user.email, role: user.role });
     const refreshToken = await signRefreshToken({ userId: user.id, email: user.email, role: user.role });
 

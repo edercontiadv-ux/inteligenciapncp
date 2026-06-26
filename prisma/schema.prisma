@@ -7,19 +7,35 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  role         String   @default("user")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id               String    @id @default(uuid())
+  name             String
+  email            String    @unique
+  phone            String?
+  passwordHash     String    @map("password_hash")
+  role             String    @default("user")
+  emailVerifiedAt  DateTime? @map("email_verified_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
 
-  clients       Client[]
-  tasks         Task[]
-  subscriptions Subscription[]
-  searchLogs    SearchLog[]
+  clients          Client[]
+  tasks            Task[]
+  subscriptions    Subscription[]
+  searchLogs       SearchLog[]
 
   @@map("users")
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  email     String
+  code      String
+  type      String   @default("email_verification")
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("verification_codes")
+  @@index([email, code])
+  @@index([email, type])
 }
 
 model RefreshTokenBlacklist {
