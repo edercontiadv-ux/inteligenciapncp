@@ -4,6 +4,7 @@ import ThemeProvider from "@/components/ThemeProvider";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import PNCPStatusIndicator from "@/components/PNCPStatusIndicator";
 import NavigationTabs from "@/components/NavigationTabs";
+import LogoutButton from "@/components/LogoutButton";
 import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata: Metadata = {
@@ -50,6 +51,7 @@ export default function RootLayout({
                   <div className="flex items-center gap-4">
                     <PNCPStatusIndicator />
                     <ThemeSwitcher />
+                    <LogoutButton />
                   </div>
                 </div>
 
