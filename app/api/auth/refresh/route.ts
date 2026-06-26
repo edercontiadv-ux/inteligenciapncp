@@ -5,17 +5,16 @@ import { signToken, signRefreshToken, verifyRefreshToken, getRefreshTokenFromReq
 import { checkRateLimit } from '@/lib/rate-limiter';
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-  const rateLimit = await checkRateLimit(ip);
-
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { success: false, message: 'Muitas tentativas. Tente novamente em instantes.' },
-      { status: 429 }
-    );
-  }
-
   try {
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimit = await checkRateLimit(ip);
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, message: 'Muitas tentativas. Tente novamente em instantes.' },
+        { status: 429 }
+      );
+    }
     const rawToken = getRefreshTokenFromRequest(req);
     if (!rawToken) {
       return NextResponse.json(
