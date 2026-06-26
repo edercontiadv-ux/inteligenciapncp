@@ -1,186 +1,119 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import FormBusca from '@/components/FormBusca';
-import PainelResultados from '@/components/PainelResultados';
-import SkeletonCard from '@/components/SkeletonCard';
-import { PNCPResult } from '@/lib/pncp-api';
-import { SearchX, Scale, TrendingDown, Search, FileText, BarChart3 } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
+import { useRouter } from 'next/navigation';
+import { Scale, Search, BarChart3, Shield, TrendingDown, ArrowRight } from 'lucide-react';
+import { useEffect } from 'react';
 
-type EtapaBusca = 'preparando' | 'consultando' | 'processando' | null;
-
-const ETAPAS: { key: EtapaBusca; label: string; icon: typeof Search }[] = [
-  { key: 'preparando', label: 'Extraindo termos de busca...', icon: Search },
-  { key: 'consultando', label: 'Consultando PNCP (últimos 12 meses)...', icon: FileText },
-  { key: 'processando', label: 'Processando resultados...', icon: BarChart3 },
-];
-
-export default function Home() {
-  const [results, setResults] = useState<PNCPResult[]>([]);
-  const [termoBusca, setTermoBusca] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [jaPesquisou, setJaPesquisou] = useState(false);
-  const [sugestoes, setSugestoes] = useState<string[] | undefined>(undefined);
-  const [etapa, setEtapa] = useState<EtapaBusca>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const etapaTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+export default function LandingPage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    return () => etapaTimers.current.forEach(clearTimeout);
-  }, []);
-
-  const handleSearch = async (termos: string[]) => {
-    if (abortRef.current) abortRef.current.abort();
-    abortRef.current = new AbortController();
-
-    setIsLoading(true);
-    setError(null);
-    setJaPesquisou(true);
-    setTermoBusca(termos.join(', '));
-    setResults([]);
-    setEtapa('preparando');
-
-    etapaTimers.current.forEach(clearTimeout);
-    etapaTimers.current = [
-      setTimeout(() => setEtapa('consultando'), 800),
-      setTimeout(() => setEtapa('processando'), 3000),
-    ];
-
-    try {
-      const q = termos.join(',');
-      const res = await fetch(`/api/buscar?q=${encodeURIComponent(q)}`, {
-        signal: abortRef.current.signal,
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || 'Falha ao consultar API do PNCP');
-      }
-      const data = await res.json();
-      setResults(data.results || []);
-      setSugestoes(data.sugestoes);
-    } catch (err: any) {
-      if (err.name === 'AbortError') return;
-      setError('Não foi possível realizar a busca. Verifique sua conexão ou tente novamente mais tarde.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-      setEtapa(null);
+    if (!isLoading && user) {
+      router.push('/busca');
     }
-  };
-
-  const etapaAtualIndex = ETAPAS.findIndex(e => e.key === etapa);
+  }, [user, isLoading, router]);
 
   return (
-    <div className="space-y-10 animate-fade-in">
-      <section className="relative">
-        <div className="max-w-2xl">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-brand-navy/5 flex items-center justify-center">
-              <Scale className="w-5 h-5 text-brand-navy" />
+    <div className="animate-fade-in">
+      <section className="relative py-20 sm:py-28">
+        <div className="max-w-3xl">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-brand-navy flex items-center justify-center">
+              <span className="text-brand-gold font-heading text-2xl italic">P</span>
             </div>
-            <span className="font-body text-xs text-brand-navy/40 uppercase tracking-widest">
-              Art. 23 — Lei nº 14.133/2021
-            </span>
+            <div>
+              <h1 className="font-heading text-xl text-brand-navy">Inteligência PNCP</h1>
+              <span className="font-body text-xs text-brand-navy/50 tracking-widest uppercase">
+                Pesquisa de Preços
+              </span>
+            </div>
           </div>
-          <h2 className="font-heading text-3xl sm:text-4xl text-brand-navy leading-tight mb-3">
+
+          <h2 className="font-heading text-4xl sm:text-5xl lg:text-6xl text-brand-navy leading-tight mb-6">
             Componha seu
             <br />
             <span className="text-brand-gold">preço médio</span>
           </h2>
-          <p className="font-body text-brand-navy/60 text-base leading-relaxed">
+          <p className="font-body text-lg text-brand-navy/60 leading-relaxed max-w-2xl mb-10">
             Pesquise contratos e atas de registro de preços diretamente no banco de dados do
-            Portal Nacional de Contratações Públicas.
+            Portal Nacional de Contratações Públicas. Ferramenta auxiliar baseada no art. 23
+            da Lei nº 14.133/2021.
           </p>
+
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/login')}
+              className="btn-primary text-base px-8 py-3"
+            >
+              Entrar
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </button>
+            <button
+              onClick={() => router.push('/planos')}
+              className="btn-secondary text-base px-8 py-3"
+            >
+              Ver Planos
+            </button>
+          </div>
         </div>
       </section>
 
-      <FormBusca onSearch={handleSearch} isLoading={isLoading} />
+      <section className="py-20 border-t border-brand-sand/20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-brand-navy/5 flex items-center justify-center">
+              <Search className="w-6 h-6 text-brand-navy" />
+            </div>
+            <h3 className="font-heading text-xl text-brand-navy">Busca Inteligente</h3>
+            <p className="font-body text-sm text-brand-navy/60 leading-relaxed">
+              Pesquise por descrição do objeto, termo ou palavra-chave. O sistema busca nos
+              últimos 12 meses de contratos e atas do PNCP.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-brand-navy/5 flex items-center justify-center">
+              <BarChart3 className="w-6 h-6 text-brand-navy" />
+            </div>
+            <h3 className="font-heading text-xl text-brand-navy">Análise de Preços</h3>
+            <p className="font-body text-sm text-brand-navy/60 leading-relaxed">
+              Visualize estatísticas, distribuição de valores e composição de preço médio
+              com scoring por relevância.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="w-12 h-12 rounded-xl bg-brand-navy/5 flex items-center justify-center">
+              <Shield className="w-6 h-6 text-brand-navy" />
+            </div>
+            <h3 className="font-heading text-xl text-brand-navy">Gestão de Órgãos</h3>
+            <p className="font-body text-sm text-brand-navy/60 leading-relaxed">
+              Cadastre órgãos e tarefas, acompanhe prazos e gerencie seus processos
+              licitatórios em um só lugar.
+            </p>
+          </div>
+        </div>
+      </section>
 
-      {error && (
-        <div className="animate-fade-up rounded-xl border border-red-200 bg-red-50/80 backdrop-blur-sm p-5">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-              <SearchX className="w-4 h-4 text-red-500" />
-            </div>
-            <div className="flex-1">
-              <p className="font-body text-sm font-medium text-red-800">Erro na consulta</p>
-              <p className="font-body text-sm text-red-600 mt-0.5">{error}</p>
-              {error.includes('indisponível') && (
-                <button
-                  onClick={() => handleSearch(termoBusca.split(', '))}
-                  className="mt-3 px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 transition-colors"
-                >
-                  Tentar novamente
-                </button>
-              )}
-            </div>
+      <section className="py-20 border-t border-brand-sand/20">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div>
+            <h3 className="font-heading text-2xl text-brand-navy mb-2">
+              Comece gratuitamente
+            </h3>
+            <p className="font-body text-sm text-brand-navy/50 max-w-md">
+              7 dias de teste grátis, sem compromisso. Depois, escolha o plano que melhor
+              atende sua demanda.
+            </p>
           </div>
+          <button
+            onClick={() => router.push('/login')}
+            className="btn-primary text-base px-8 py-3 shrink-0"
+          >
+            Criar Conta Grátis
+          </button>
         </div>
-      )}
-
-      {isLoading && etapa ? (
-        <div className="space-y-6 animate-fade-in">
-          <div className="max-w-md mx-auto space-y-4">
-            {ETAPAS.map((e, i) => {
-              const isActive = i === etapaAtualIndex;
-              const isDone = i < etapaAtualIndex;
-              return (
-                <div key={e.key} className={`flex items-center gap-3 transition-opacity ${isDone ? 'opacity-40' : isActive ? 'opacity-100' : 'opacity-20'}`}>
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${isDone ? 'bg-green-100' : isActive ? 'bg-brand-navy' : 'bg-brand-sand/30'}`}>
-                    <e.icon className={`w-3.5 h-3.5 ${isDone ? 'text-green-600' : isActive ? 'text-white' : 'text-brand-navy/30'}`} />
-                  </div>
-                  <span className={`font-body text-sm ${isActive ? 'text-brand-navy font-medium' : 'text-brand-navy/50'}`}>{e.label}</span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-          </div>
-        </div>
-      ) : jaPesquisou && results.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 animate-fade-up">
-          <div className="w-16 h-16 rounded-full bg-brand-sand/30 flex items-center justify-center mb-5">
-            <SearchX className="w-8 h-8 text-brand-navy/30" />
-          </div>
-          <p className="font-heading text-xl text-brand-navy mb-1">Nenhum resultado encontrado</p>
-          <p className="font-body text-sm text-brand-navy/50 max-w-md text-center">
-            A busca considera apenas contratos e atas dos últimos 12 meses. Tente descrever o objeto de forma diferente ou use termos mais genéricos.
-          </p>
-          {sugestoes && sugestoes.length > 0 && (
-            <div className="mt-6 flex flex-wrap gap-2 justify-center">
-              {sugestoes.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleSearch([s])}
-                  className="px-4 py-2 rounded-full border border-brand-gold/40 text-sm text-brand-navy hover:bg-brand-gold/10 transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      ) : results.length > 0 ? (
-        <div className="space-y-6 animate-fade-up" role="status" aria-live="polite">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
-            <div>
-              <h3 className="font-heading text-xl text-brand-navy">
-                Resultados encontrados
-              </h3>
-              <p className="font-body text-sm text-brand-navy/50 mt-1">
-                Termo: <span className="text-brand-navy/70 font-medium">&quot;{termoBusca}&quot;</span>
-              </p>
-            </div>
-            <div className="flex items-center gap-2 font-body text-sm text-brand-navy/50">
-              <TrendingDown className="w-4 h-4" />
-              <span>{results.length} registro{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
-          <PainelResultados results={results} termoBusca={termoBusca} />
-        </div>
-      ) : null}
+      </section>
     </div>
   );
 }

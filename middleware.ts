@@ -9,7 +9,7 @@ function getJwtSecret(): Uint8Array {
   return new TextEncoder().encode(process.env.JWT_SECRET);
 }
 
-const protectedRoutes = ['/profile', '/dashboard', '/api/projects'];
+const protectedPages = ['/busca', '/tarefas', '/orgaos', '/planos', '/account'];
 
 function getToken(req: NextRequest): string | null {
   const fromCookie = req.cookies.get('inteligencia-pncp-token')?.value;
@@ -23,36 +23,37 @@ function getToken(req: NextRequest): string | null {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const isProtected = protectedRoutes.some(route => pathname.startsWith(route));
+  const token = getToken(req);
+
+  if (pathname === '/') {
+    if (token) {
+      try {
+        await jwtVerify(token, getJwtSecret());
+        return NextResponse.redirect(new URL('/busca', req.url));
+      } catch {}
+    }
+    return NextResponse.next();
+  }
+
+  const isProtected = protectedPages.some(route => pathname === route || pathname.startsWith(route + '/'));
   if (!isProtected) return NextResponse.next();
 
-  const token = getToken(req);
   if (!token) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid credentials' },
-      { status: 401 }
-    );
+    const loginUrl = new URL('/login', req.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   try {
-    const { payload } = await jwtVerify(token, getJwtSecret());
-
-    const requestHeaders = new Headers(req.headers);
-    requestHeaders.set('x-user-id', payload.sub as string);
-    requestHeaders.set('x-user-email', payload.email as string);
-    requestHeaders.set('x-user-role', payload.role as string);
-
-    return NextResponse.next({
-      request: { headers: requestHeaders },
-    });
+    await jwtVerify(token, getJwtSecret());
+    return NextResponse.next();
   } catch {
-    return NextResponse.json(
-      { success: false, message: 'Invalid credentials' },
-      { status: 401 }
-    );
+    const loginUrl = new URL('/login', req.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 }
 
 export const config = {
-  matcher: ['/profile/:path*', '/dashboard/:path*', '/api/projects/:path*'],
+  matcher: ['/', '/busca', '/busca/:path*', '/tarefas', '/tarefas/:path*', '/orgaos', '/orgaos/:path*', '/planos', '/planos/:path*', '/account', '/account/:path*'],
 };

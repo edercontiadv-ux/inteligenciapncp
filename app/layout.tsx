@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
-import PNCPStatusIndicator from "@/components/PNCPStatusIndicator";
-import NavigationTabs from "@/components/NavigationTabs";
-import LogoutButton from "@/components/LogoutButton";
+import Header from "@/components/Header";
 import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata: Metadata = {
@@ -30,33 +27,9 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <div className="relative">
-              {/* Decorative top bar */}
               <div className="h-1.5 bg-gradient-to-r from-brand-navy via-brand-gold to-brand-forest" />
 
-              <header className="relative z-10 border-b border-brand-sand/30 bg-white/80 backdrop-blur-sm">
-                <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-brand-navy flex items-center justify-center">
-                      <span className="text-brand-gold font-heading text-lg italic">P</span>
-                    </div>
-                    <div>
-                      <h1 className="font-heading text-xl text-brand-navy leading-tight">
-                        Inteligência PNCP
-                      </h1>
-                      <span className="font-body text-xs text-brand-navy/50 tracking-widest uppercase">
-                        Pesquisa de Preços
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <PNCPStatusIndicator />
-                    <ThemeSwitcher />
-                    <LogoutButton />
-                  </div>
-                </div>
-
-                <NavigationTabs />
-              </header>
+              <Header />
 
               <main className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
                 {children}

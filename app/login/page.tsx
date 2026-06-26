@@ -43,7 +43,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      router.push('/tarefas');
+      router.push('/busca');
     } catch (err: any) {
       if (err.message?.includes('Confirme seu e-mail')) {
         setEtapa('verify');
@@ -61,7 +61,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await verifyEmail(email, code);
-      router.push('/account');
+      router.push('/busca');
     } catch (err: any) {
       setError(err.message || 'Código inválido');
     } finally {
