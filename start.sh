@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-if [ "$1" = "migrate" ]; then
+if [ "$1" = "migrate" ] || [ "$MIGRATE" = "true" ]; then
   echo "Running Prisma migrations..."
   npx prisma migrate deploy
   echo "Migrations concluídas."
