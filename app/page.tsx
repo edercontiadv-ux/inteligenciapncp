@@ -2,8 +2,34 @@
 
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { Scale, Search, BarChart3, Shield, TrendingDown, ArrowRight } from 'lucide-react';
-import { useEffect } from 'react';
+import { Scale, Search, BarChart3, Shield, TrendingDown, ArrowRight, Check, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import PricingCard from '@/components/PricingCard';
+
+const PLANOS = [
+  {
+    name: 'Teste Grátis',
+    price: 'R$ 0',
+    period: '/7 dias',
+    features: ['7 dias de teste gratuito', '1 usuário', 'Até 10 clientes', '20 buscas por dia', 'Tarefas básicas'],
+    slug: 'free-trial',
+  },
+  {
+    name: 'Profissional',
+    price: 'R$ 19,90',
+    period: '/mês',
+    features: ['2 usuários', 'Clientes ilimitados', '100 buscas por dia', 'Tarefas ilimitadas', 'Suporte prioritário'],
+    slug: 'pro',
+    highlighted: true,
+  },
+  {
+    name: 'Escritório',
+    price: 'R$ 39,90',
+    period: '/mês',
+    features: ['5 usuários', 'Clientes ilimitados', 'Buscas ilimitadas', 'Tarefas ilimitadas', 'Suporte VIP', 'Relatórios avançados'],
+    slug: 'office',
+  },
+];
 
 export default function LandingPage() {
   const { user, isLoading } = useAuth();
@@ -17,6 +43,7 @@ export default function LandingPage() {
 
   return (
     <div className="animate-fade-in">
+      {/* Hero */}
       <section className="relative py-20 sm:py-28">
         <div className="max-w-3xl">
           <div className="flex items-center gap-3 mb-6">
@@ -60,7 +87,16 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Features */}
       <section className="py-20 border-t border-brand-sand/20">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <h2 className="font-heading text-3xl text-brand-navy mb-3">
+            Tudo que você precisa
+          </h2>
+          <p className="font-body text-brand-navy/60">
+            Da pesquisa à gestão de processos licitatórios, centralizado em um só lugar.
+          </p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div className="space-y-4">
             <div className="w-12 h-12 rounded-xl bg-brand-navy/5 flex items-center justify-center">
@@ -95,22 +131,48 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Planos */}
       <section className="py-20 border-t border-brand-sand/20">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <div>
-            <h3 className="font-heading text-2xl text-brand-navy mb-2">
-              Comece gratuitamente
-            </h3>
-            <p className="font-body text-sm text-brand-navy/50 max-w-md">
-              7 dias de teste grátis, sem compromisso. Depois, escolha o plano que melhor
-              atende sua demanda.
-            </p>
-          </div>
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <h2 className="font-heading text-3xl text-brand-navy mb-3">
+            Planos e Preços
+          </h2>
+          <p className="font-body text-brand-navy/60">
+            Escolha o plano ideal para seu escritório. Cancele quando quiser.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-start">
+          {PLANOS.map((plano) => (
+            <PricingCard
+              key={plano.slug}
+              name={plano.name}
+              price={plano.price}
+              period={plano.period}
+              features={plano.features}
+              highlighted={plano.highlighted}
+              cta="Começar grátis"
+              onCta={() => router.push('/login')}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Final */}
+      <section className="py-20 border-t border-brand-sand/20">
+        <div className="max-w-3xl mx-auto text-center">
+          <h3 className="font-heading text-3xl text-brand-navy mb-4">
+            Comece gratuitamente
+          </h3>
+          <p className="font-body text-brand-navy/60 max-w-lg mx-auto mb-8">
+            7 dias de teste grátis, sem compromisso. Depois, escolha o plano que melhor
+            atende sua demanda.
+          </p>
           <button
             onClick={() => router.push('/login')}
-            className="btn-primary text-base px-8 py-3 shrink-0"
+            className="btn-primary text-base px-10 py-3"
           >
             Criar Conta Grátis
+            <ChevronRight className="w-5 h-5 ml-1" />
           </button>
         </div>
       </section>
