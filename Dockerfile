@@ -22,6 +22,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --chown=nextjs:nodejs start.sh ./
+RUN chmod +x start.sh
 USER nextjs
 EXPOSE 8080
 ENV PORT=8080
