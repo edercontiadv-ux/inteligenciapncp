@@ -71,10 +71,6 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     loadFonts(theme.fontUrls);
   }, [theme, mounted]);
 
-  useEffect(() => {
-    if (mounted) loadFonts(defaultTheme.fontUrls);
-  }, [mounted]);
-
   return (
     <ThemeContext.Provider value={{ theme, setTheme, availableThemes: activeThemes }}>
       {children}

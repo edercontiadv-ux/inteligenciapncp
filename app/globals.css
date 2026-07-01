@@ -37,10 +37,6 @@
     @apply bg-white rounded-lg border border-brand-sand/40 shadow-sm hover:shadow-md transition-all duration-300;
   }
 
-  .chip {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors;
-  }
-
   .btn-primary {
     @apply inline-flex items-center px-5 py-2.5 rounded-lg font-body font-medium text-sm
            bg-brand-navy text-white

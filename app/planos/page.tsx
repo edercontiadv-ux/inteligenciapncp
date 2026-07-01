@@ -4,31 +4,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import PricingCard from '@/components/PricingCard';
 import { Scale } from 'lucide-react';
-
-const PLANOS = [
-  {
-    name: 'Teste Grátis',
-    price: 'R$ 0',
-    period: '/7 dias',
-    features: ['7 dias de teste gratuito', '1 usuário', 'Até 10 clientes', '20 buscas por dia', 'Tarefas básicas'],
-    slug: 'free-trial',
-  },
-  {
-    name: 'Profissional',
-    price: 'R$ 19,90',
-    period: '/mês',
-    features: ['2 usuários', 'Clientes ilimitados', '100 buscas por dia', 'Tarefas ilimitadas', 'Suporte prioritário'],
-    slug: 'pro',
-    highlighted: true,
-  },
-  {
-    name: 'Escritório',
-    price: 'R$ 39,90',
-    period: '/mês',
-    features: ['5 usuários', 'Clientes ilimitados', 'Buscas ilimitadas', 'Tarefas ilimitadas', 'Suporte VIP', 'Relatórios avançados'],
-    slug: 'office',
-  },
-];
+import { PLANOS } from '@/lib/planos';
 
 export default function PlanosPage() {
   const { user, isLoading } = useAuth();

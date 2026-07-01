@@ -3,7 +3,25 @@ import { prisma } from '@/lib/prisma';
 const WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS = 30;
 
+async function ensureRateLimitTable(): Promise<void> {
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS rate_limits (
+        id TEXT PRIMARY KEY,
+        key TEXT NOT NULL UNIQUE,
+        count INTEGER NOT NULL DEFAULT 1,
+        reset_at TIMESTAMP(3) NOT NULL,
+        created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  } catch {
+    // table may already exist or db is down — swallow
+  }
+}
+
 export async function checkRateLimit(ip: string): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  await ensureRateLimitTable();
+
   const now = new Date();
   const key = `rl:${ip}`;
 

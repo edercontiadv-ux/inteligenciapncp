@@ -114,6 +114,3 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function authHeaders(): Record<string, string> {
-  return { 'Content-Type': 'application/json' };
-}

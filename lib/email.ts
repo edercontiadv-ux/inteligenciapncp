@@ -1,8 +1,15 @@
 export async function sendVerificationEmail(email: string, code: string): Promise<void> {
-  if (process.env.RESEND_API_KEY) {
+  console.log(`[EMAIL] Código de verificação para ${email}: ${code}`);
+
+  if (!process.env.RESEND_API_KEY) {
+    console.log('[EMAIL] RESEND_API_KEY não configurada. Código disponível apenas no console.');
+    return;
+  }
+
+  try {
     const { Resend } = await import('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: process.env.EMAIL_FROM || 'Inteligência PNCP <noreply@inteligenciapncp.com.br>',
       to: email,
       subject: 'Confirme seu e-mail — Inteligência PNCP',
@@ -21,8 +28,9 @@ export async function sendVerificationEmail(email: string, code: string): Promis
         </div>
       `,
     });
-  } else {
-    console.log(`[EMAIL dev] Código de verificação para ${email}: ${code}`);
+    console.log('[EMAIL] Resend result:', JSON.stringify(result));
+  } catch (error) {
+    console.error('[EMAIL] Erro ao enviar e-mail:', error);
   }
 }
 

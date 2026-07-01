@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { PNCPResult, gerarId } from '@/lib/pncp-api';
-import CardContrato from './CardContrato';
-import CardAta from './CardAta';
+import CardItem from './CardItem';
 import CardEstatisticas from './CardEstatisticas';
 import { SlidersHorizontal, X, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import RelatorioExport from './RelatorioExport';
@@ -215,18 +214,9 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
           const id = gerarId(item, (page - 1) * ITEMS_PER_PAGE + index);
           const staggerClass = `stagger-${Math.min(index + 1, 8)}`;
 
-          return item.tipo === 'CONTRATO' ? (
+          return (
             <div key={id} className={`animate-fade-up opacity-0 ${staggerClass}`}>
-              <CardContrato
-                data={item}
-                index={(page - 1) * ITEMS_PER_PAGE + index}
-                onSelect={handleSelect}
-                isSelected={selectedIds.includes(id)}
-              />
-            </div>
-          ) : (
-            <div key={id} className={`animate-fade-up opacity-0 ${staggerClass}`}>
-              <CardAta
+              <CardItem
                 data={item}
                 index={(page - 1) * ITEMS_PER_PAGE + index}
                 onSelect={handleSelect}

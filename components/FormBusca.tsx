@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Loader2, Sparkles } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 
 interface FormBuscaProps {
   onSearch: (termos: string[]) => void;

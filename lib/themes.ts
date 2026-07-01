@@ -18,7 +18,7 @@ export interface Theme {
   fontUrls: string[];
 }
 
-export const themes: Theme[] = [
+const themes: Theme[] = [
   {
     id: 'institutional',
     name: 'Institucional',
@@ -42,7 +42,7 @@ export const themes: Theme[] = [
   }
 ];
 
-export const institutionalDark: Theme = {
+const institutionalDark: Theme = {
   id: 'institutional-dark',
   name: 'Institucional Escuro',
   description: 'Modo escuro da identidade institucional',

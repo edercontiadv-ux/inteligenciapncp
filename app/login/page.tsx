@@ -1,11 +1,44 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { Scale, Mail, Phone, Lock, User, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Scale, Mail, Phone, Lock, User, ArrowLeft, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
 type Etapa = 'login' | 'register' | 'verify';
+
+function PasswordInput({ value, onChange, placeholder, required, minLength }: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  required?: boolean;
+  minLength?: number;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
+      <input
+        type={show ? 'text' : 'password'}
+        className="input-field pl-10 pr-10"
+        placeholder={placeholder}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        required={required}
+        minLength={minLength}
+      />
+      <button
+        type="button"
+        onClick={() => setShow(!show)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-navy/30 hover:text-brand-navy/60 transition-colors"
+        tabIndex={-1}
+        aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}
+      >
+        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   const { login, register, verifyEmail, resendCode } = useAuth();
@@ -19,7 +52,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
-  const resendTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +111,25 @@ export default function LoginPage() {
     }
   };
 
+  const handleVerifyByPassword = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/verify-by-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      router.push('/busca');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao verificar');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="w-full max-w-md">
@@ -131,6 +182,25 @@ export default function LoginPage() {
               Reenviar código
             </button>
 
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-brand-sand/30" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-white px-3 text-xs text-brand-navy/40 font-body">ou</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleVerifyByPassword}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 text-sm text-brand-navy/60 hover:text-brand-navy font-body border border-brand-sand/40 rounded-lg px-4 py-2.5 hover:border-brand-sand/60 transition-colors"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              Verificar usando minha senha
+            </button>
+
             <button
               type="button"
               onClick={() => { setEtapa('login'); setError(''); }}
@@ -167,10 +237,7 @@ export default function LoginPage() {
             </div>
             <div>
               <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Senha</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
-                <input type="password" className="input-field pl-10" placeholder="Mínimo 6 caracteres" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
-              </div>
+              <PasswordInput value={password} onChange={setPassword} placeholder="Mínimo 6 caracteres" required minLength={6} />
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
@@ -197,10 +264,7 @@ export default function LoginPage() {
             </div>
             <div>
               <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Senha</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
-                <input type="password" className="input-field pl-10" placeholder="Sua senha" value={password} onChange={e => setPassword(e.target.value)} required />
-              </div>
+              <PasswordInput value={password} onChange={setPassword} placeholder="Sua senha" required />
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full justify-center">

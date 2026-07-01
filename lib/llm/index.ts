@@ -55,8 +55,4 @@ export function getLLMProvider(): LLMProvider {
   return cachedProvider;
 }
 
-export function resetProvider(): void {
-  cachedProvider = null;
-}
-
 export type { LLMProvider, ProviderName };

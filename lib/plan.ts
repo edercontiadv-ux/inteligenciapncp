@@ -56,11 +56,4 @@ export async function checkSearchLimit(userId: string): Promise<{ allowed: boole
   return { allowed: remaining > 0, remaining };
 }
 
-export async function checkClientLimit(userId: string): Promise<boolean> {
-  const plan = await getUserPlan(userId);
-  if (!plan) return false;
-  if (plan.maxClients === -1) return true;
 
-  const count = await prisma.client.count({ where: { userId } });
-  return count < plan.maxClients;
-}

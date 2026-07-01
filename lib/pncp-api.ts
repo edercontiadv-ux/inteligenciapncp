@@ -72,7 +72,7 @@ function filtrarPorData(items: PNCPResult[], dataInicial: string, dataFinal: str
   });
 }
 
-export async function searchPNCPText(
+async function searchPNCPText(
   termo: string,
   tipoDocumento: 'contrato' | 'ata',
   pagina: number = 1,
