@@ -71,7 +71,7 @@ export default function BuscaPage() {
       setSugestoes(data.sugestoes);
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      setError('Não foi possível realizar a busca. Verifique sua conexão ou tente novamente mais tarde.');
+      setError(err.message || 'Não foi possível realizar a busca. Verifique sua conexão ou tente novamente mais tarde.');
       console.error(err);
     } finally {
       setIsLoading(false);

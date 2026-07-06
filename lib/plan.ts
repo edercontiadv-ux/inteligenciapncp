@@ -18,7 +18,18 @@ export async function getUserPlan(userId: string): Promise<PlanInfo | null> {
     include: { plan: true },
   });
 
-  if (!sub) return null;
+  if (!sub) {
+    return {
+      slug: 'free',
+      name: 'Free Trial',
+      priceCents: 0,
+      maxUsers: 1,
+      maxClients: 10,
+      maxSearches: 100,
+      status: 'trial',
+      trialEndsAt: null,
+    };
+  }
 
   const expired = sub.status === 'trial' && sub.trialEndsAt && sub.trialEndsAt < new Date();
   if (expired) {

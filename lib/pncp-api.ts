@@ -17,8 +17,10 @@ function getCacheKey(termo: string, tipoDocumento: string, pagina: number, dataI
   return `${termo}:${tipoDocumento}:${pagina}:${dataInicial || ''}:${dataFinal || ''}`;
 }
 
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36';
+
 async function fetchWithRetry(url: string, attempt: number = 1): Promise<Response> {
-  const response = await fetch(url);
+  const response = await fetch(url, { headers: { 'User-Agent': UA } });
   if (response.ok) return response;
   if (response.status < 500) throw new Error(`API PNCP retornou HTTP ${response.status}: ${response.statusText}`);
   if (attempt >= RETRY_MAX) throw new Error(`API PNCP falhou após ${RETRY_MAX} tentativas: HTTP ${response.status}`);
