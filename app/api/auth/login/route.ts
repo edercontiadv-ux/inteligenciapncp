@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { comparePassword, signToken, signRefreshToken, setAuthCookies } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limiter';
+import { checkLoginAttempts, recordLoginAttempt, logAuthEvent, extractRequestMetadata } from '@/lib/audit';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -11,9 +12,9 @@ const loginSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const { ip, userAgent } = extractRequestMetadata(req);
+
     const rateLimit = await checkRateLimit(ip);
-    
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { success: false, message: 'Muitas tentativas. Tente novamente em instantes.' },
@@ -33,33 +34,80 @@ export async function POST(req: NextRequest) {
 
     const { email, password } = parsed.data;
 
+    const { isLocked, lockUntil } = await checkLoginAttempts(email, ip);
+    if (isLocked) {
+      const minutes = lockUntil
+        ? Math.ceil((lockUntil.getTime() - Date.now()) / 60000)
+        : 30;
+
+      logAuthEvent({
+        action: 'LOGIN_FAILED',
+        email,
+        ipAddress: ip,
+        userAgent,
+        success: false,
+        errorReason: 'ACCOUNT_LOCKED',
+        metadata: { lockDurationMinutes: minutes },
+      });
+
+      return NextResponse.json(
+        { success: false, message: `Muitas tentativas. Tente novamente em ${minutes} minuto(s).` },
+        { status: 429 }
+      );
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      await recordLoginAttempt(email, ip, false);
+
+      logAuthEvent({
+        action: 'LOGIN_FAILED',
+        email,
+        ipAddress: ip,
+        userAgent,
+        success: false,
+        errorReason: 'INVALID_CREDENTIALS',
+      });
+
       return NextResponse.json(
-        { success: false, message: 'Invalid credentials' },
+        { success: false, message: 'Email ou senha inválidos' },
         { status: 401 }
       );
     }
 
     const valid = await comparePassword(password, user.passwordHash);
     if (!valid) {
+      await recordLoginAttempt(email, ip, false);
+
+      logAuthEvent({
+        action: 'LOGIN_FAILED',
+        userId: user.id,
+        email,
+        ipAddress: ip,
+        userAgent,
+        success: false,
+        errorReason: 'INVALID_CREDENTIALS',
+      });
+
       return NextResponse.json(
-        { success: false, message: 'Invalid credentials' },
+        { success: false, message: 'Email ou senha inválidos' },
         { status: 401 }
       );
     }
 
-    if (!user.emailVerifiedAt) {
-      return NextResponse.json({
-        success: false,
-        message: 'Confirme seu e-mail antes de acessar.',
-        needsVerification: true,
-        email: user.email,
-      }, { status: 403 });
-    }
+    await recordLoginAttempt(email, ip, true);
 
-    const token = await signToken({ userId: user.id, email: user.email, role: user.role });
-    const refreshToken = await signRefreshToken({ userId: user.id, email: user.email, role: user.role });
+    logAuthEvent({
+      action: 'LOGIN',
+      userId: user.id,
+      email,
+      ipAddress: ip,
+      userAgent,
+      success: true,
+    });
+
+    const token = await signToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });
+    const refreshToken = await signRefreshToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });
 
     const res = NextResponse.json({
       success: true,

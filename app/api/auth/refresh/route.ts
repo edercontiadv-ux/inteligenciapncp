@@ -3,18 +3,20 @@ import { createHash } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { signToken, signRefreshToken, verifyRefreshToken, getRefreshTokenFromRequest, setAuthCookies } from '@/lib/auth';
 import { checkRateLimit } from '@/lib/rate-limiter';
+import { extractRequestMetadata } from '@/lib/audit';
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-    const rateLimit = await checkRateLimit(ip);
+    const { ip } = extractRequestMetadata(req);
 
+    const rateLimit = await checkRateLimit(ip);
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { success: false, message: 'Muitas tentativas. Tente novamente em instantes.' },
         { status: 429 }
       );
     }
+
     const rawToken = getRefreshTokenFromRequest(req);
     if (!rawToken) {
       return NextResponse.json(
@@ -42,8 +44,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = await signToken({ userId: user.id, email: user.email, role: user.role });
-    const refreshToken = await signRefreshToken({ userId: user.id, email: user.email, role: user.role });
+    if (payload.tokenVersion !== user.tokenVersion) {
+      return NextResponse.json(
+        { success: false, message: 'Sessão expirada. Faça login novamente.' },
+        { status: 401 }
+      );
+    }
+
+    const token = await signToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });
+    const refreshToken = await signRefreshToken({ userId: user.id, email: user.email, role: user.role, tokenVersion: user.tokenVersion });
 
     await prisma.refreshTokenBlacklist.create({
       data: { tokenHash, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },

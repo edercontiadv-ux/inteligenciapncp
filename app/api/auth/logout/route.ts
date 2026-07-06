@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
 import { prisma } from '@/lib/prisma';
-import { getRefreshTokenFromRequest, clearAuthCookies } from '@/lib/auth';
+import { getRefreshTokenFromRequest, clearAuthCookies, authenticate } from '@/lib/auth';
+import { logAuthEvent, extractRequestMetadata } from '@/lib/audit';
 
 export async function POST(req: NextRequest) {
   try {
+    const { ip, userAgent } = extractRequestMetadata(req);
+    const payload = await authenticate(req);
+
     const refreshToken = getRefreshTokenFromRequest(req);
 
     if (refreshToken) {
@@ -20,6 +24,18 @@ export async function POST(req: NextRequest) {
 
     const res = NextResponse.json({ success: true, message: 'Sessão encerrada.' });
     clearAuthCookies(res);
+
+    if (payload) {
+      logAuthEvent({
+        action: 'LOGOUT',
+        userId: payload.sub,
+        email: payload.email,
+        ipAddress: ip,
+        userAgent,
+        success: true,
+      });
+    }
+
     return res;
   } catch (error) {
     console.error('Error in logout:', error);

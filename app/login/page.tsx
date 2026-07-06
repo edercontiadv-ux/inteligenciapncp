@@ -3,16 +3,13 @@
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
-import { Scale, Mail, Phone, Lock, User, ArrowLeft, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { Scale, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
-type Etapa = 'login' | 'register' | 'verify';
-
-function PasswordInput({ value, onChange, placeholder, required, minLength }: {
+function PasswordInput({ value, onChange, placeholder, required }: {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   required?: boolean;
-  minLength?: number;
 }) {
   const [show, setShow] = useState(false);
   return (
@@ -25,7 +22,6 @@ function PasswordInput({ value, onChange, placeholder, required, minLength }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         required={required}
-        minLength={minLength}
       />
       <button
         type="button"
@@ -41,33 +37,12 @@ function PasswordInput({ value, onChange, placeholder, required, minLength }: {
 }
 
 export default function LoginPage() {
-  const { login, register, verifyEmail, resendCode } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
-  const [etapa, setEtapa] = useState<Etapa>('login');
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [codeSent, setCodeSent] = useState(false);
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const result = await register(name, email, phone, password);
-      setEmail(result.email);
-      setCodeSent(true);
-      setEtapa('verify');
-    } catch (err: any) {
-      setError(err.message || 'Erro ao cadastrar');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,54 +52,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/busca');
     } catch (err: any) {
-      if (err.message?.includes('Confirme seu e-mail')) {
-        setEtapa('verify');
-      } else {
-        setError(err.message || 'Erro ao autenticar');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      await verifyEmail(email, code);
-      router.push('/busca');
-    } catch (err: any) {
-      setError(err.message || 'Código inválido');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    setError('');
-    try {
-      await resendCode(email);
-      setCodeSent(true);
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
-  const handleVerifyByPassword = async () => {
-    setError('');
-    setLoading(true);
-    try {
-      const res = await fetch('/api/auth/verify-by-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message);
-      router.push('/busca');
-    } catch (err: any) {
-      setError(err.message || 'Erro ao verificar');
+      setError(err.message || 'Erro ao autenticar');
     } finally {
       setLoading(false);
     }
@@ -137,150 +65,42 @@ export default function LoginPage() {
           <div className="w-14 h-14 rounded-full bg-brand-navy/5 flex items-center justify-center mx-auto mb-4">
             <Scale className="w-7 h-7 text-brand-navy" />
           </div>
-          <h2 className="font-heading text-2xl text-brand-navy mb-1">
-            {etapa === 'verify' ? 'Confirme seu e-mail' : etapa === 'register' ? 'Criar Conta' : 'Entrar'}
-          </h2>
-          <p className="font-body text-sm text-brand-navy/50">
-            {etapa === 'verify'
-              ? `Enviamos um código para ${email}`
-              : etapa === 'register'
-              ? 'Preencha seus dados para começar'
-              : 'Acesse sua conta'}
-          </p>
+          <h2 className="font-heading text-2xl text-brand-navy mb-1">Entrar</h2>
+          <p className="font-body text-sm text-brand-navy/50">Acesse sua conta</p>
         </div>
 
-        {etapa === 'verify' ? (
-          <form onSubmit={handleVerify} className="space-y-4">
-            <div className="bg-brand-gold/5 border border-brand-gold/20 rounded-xl p-4 text-center">
-              <p className="font-body text-sm text-brand-navy/70 mb-1">Digite o código de 6 dígitos</p>
-              <p className="font-body text-xs text-brand-navy/40">Enviado para {email}</p>
-            </div>
-
-            <div>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">E-mail</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
               <input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                className="input-field text-center text-2xl tracking-[8px] font-mono"
-                placeholder="000000"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                type="email"
+                className="input-field pl-10"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
+          </div>
 
-            <button type="submit" disabled={loading || code.length !== 6} className="btn-primary w-full justify-center">
-              {loading ? 'Verificando...' : 'Confirmar e-mail'}
-            </button>
+          <div>
+            <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Senha</label>
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
+              placeholder="Sua senha"
+              required
+            />
+          </div>
 
-            <button
-              type="button"
-              onClick={handleResend}
-              className="w-full flex items-center justify-center gap-2 text-sm text-brand-navy/50 hover:text-brand-navy font-body"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Reenviar código
-            </button>
+          <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
+            {loading ? 'Entrando...' : 'Entrar'}
+          </button>
 
-            <div className="relative py-2">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-brand-sand/30" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-xs text-brand-navy/40 font-body">ou</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleVerifyByPassword}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 text-sm text-brand-navy/60 hover:text-brand-navy font-body border border-brand-sand/40 rounded-lg px-4 py-2.5 hover:border-brand-sand/60 transition-colors"
-            >
-              <Lock className="w-3.5 h-3.5" />
-              Verificar usando minha senha
-            </button>
-
-            <button
-              type="button"
-              onClick={() => { setEtapa('login'); setError(''); }}
-              className="w-full flex items-center justify-center gap-2 text-sm text-brand-navy/50 hover:text-brand-navy font-body"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Voltar ao login
-            </button>
-
-            {error && <p className="text-red-500 text-sm font-body text-center">{error}</p>}
-          </form>
-        ) : etapa === 'register' ? (
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Nome completo</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
-                <input type="text" className="input-field pl-10" placeholder="Seu nome" value={name} onChange={e => setName(e.target.value)} required />
-              </div>
-            </div>
-            <div>
-              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">E-mail</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
-                <input type="email" className="input-field pl-10" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
-              </div>
-            </div>
-            <div>
-              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Telefone</label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
-                <input type="tel" className="input-field pl-10" placeholder="(11) 99999-9999" value={phone} onChange={e => setPhone(e.target.value)} required />
-              </div>
-            </div>
-            <div>
-              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Senha</label>
-              <PasswordInput value={password} onChange={setPassword} placeholder="Mínimo 6 caracteres" required minLength={6} />
-            </div>
-
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
-              {loading ? 'Cadastrando...' : 'Criar Conta'}
-            </button>
-
-            <p className="text-center font-body text-sm text-brand-navy/50">
-              Já tem conta?{' '}
-              <button type="button" onClick={() => { setEtapa('login'); setError(''); }} className="text-brand-navy font-medium hover:underline">
-                Entrar
-              </button>
-            </p>
-
-            {error && <p className="text-red-500 text-sm font-body">{error}</p>}
-          </form>
-        ) : (
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">E-mail</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy/30" />
-                <input type="email" className="input-field pl-10" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
-              </div>
-            </div>
-            <div>
-              <label className="font-body text-sm font-medium text-brand-navy/70 mb-1 block">Senha</label>
-              <PasswordInput value={password} onChange={setPassword} placeholder="Sua senha" required />
-            </div>
-
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
-              {loading ? 'Entrando...' : 'Entrar'}
-            </button>
-
-            <p className="text-center font-body text-sm text-brand-navy/50">
-              Não tem conta?{' '}
-              <button type="button" onClick={() => { setEtapa('register'); setError(''); }} className="text-brand-navy font-medium hover:underline">
-                Cadastre-se grátis
-              </button>
-            </p>
-
-            {error && <p className="text-red-500 text-sm font-body">{error}</p>}
-          </form>
-        )}
+          {error && <p className="text-red-500 text-sm font-body">{error}</p>}
+        </form>
       </div>
     </div>
   );

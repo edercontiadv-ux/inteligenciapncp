@@ -13,9 +13,6 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, phone: string, password: string) => Promise<{ email: string }>;
-  verifyEmail: (email: string, code: string) => Promise<void>;
-  resendCode: (email: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -23,9 +20,6 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   login: async () => {},
-  register: async () => ({ email: '' }),
-  verifyEmail: async () => {},
-  resendCode: async () => {},
   logout: async () => {},
 });
 
@@ -62,40 +56,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
-    if (!data.success) throw new Error(data.message);
+    if (!data.success) {
+      const err = new Error(data.message) as Error & { code?: string };
+      err.code = data.code;
+      throw err;
+    }
     if (data.user) setUser(data.user);
-  }, []);
-
-  const register = useCallback(async (name: string, email: string, phone: string, password: string) => {
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone, password }),
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message);
-    return { email: data.email };
-  }, []);
-
-  const verifyEmail = useCallback(async (email: string, code: string) => {
-    const res = await fetch('/api/auth/verify-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code }),
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message);
-    if (data.user) setUser(data.user);
-  }, []);
-
-  const resendCode = useCallback(async (email: string) => {
-    const res = await fetch('/api/auth/resend-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message);
   }, []);
 
   const logout = useCallback(async () => {
@@ -104,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, verifyEmail, resendCode, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -113,4 +79,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
-
