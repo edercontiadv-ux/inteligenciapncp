@@ -22,6 +22,43 @@ export interface LoginAttemptsResult {
   attemptCount: number;
 }
 
+let tablesEnsured = false;
+
+async function ensureTables(): Promise<void> {
+  if (tablesEnsured) return;
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        action TEXT NOT NULL,
+        email TEXT NOT NULL,
+        ip_address TEXT NOT NULL,
+        user_agent TEXT,
+        success BOOLEAN NOT NULL,
+        error_reason TEXT,
+        metadata JSONB,
+        created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS login_attempts (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL,
+        ip_address TEXT NOT NULL,
+        timestamp TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        success BOOLEAN NOT NULL
+      )
+    `);
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0
+    `);
+    tablesEnsured = true;
+  } catch {
+    // Tabelas podem já existir ou DB está offline
+  }
+}
+
 const LOCKOUT_RULES = [
   { threshold: 10, windowMs: 24 * 60 * 60 * 1000, lockMs: 24 * 60 * 60 * 1000 },
   { threshold: 5, windowMs: 15 * 60 * 1000, lockMs: 30 * 60 * 1000 },
@@ -92,6 +129,7 @@ async function queryLoginAttempts(email: string, ipAddress: string): Promise<{ c
 
 export async function logAuthEvent(input: LogAuthEventInput): Promise<void> {
   try {
+    await ensureTables();
     const safeMetadata = input.metadata
       ? JSON.parse(JSON.stringify(input.metadata, (key, value) => {
           if (typeof value === 'string' && value.length > 500) {
@@ -148,6 +186,7 @@ export async function checkLoginAttempts(
   }
 
   try {
+    await ensureTables();
     const { count, firstFailAt } = await queryLoginAttempts(email, ipAddress);
 
     const lockedUntil = applyLockoutRules(count, now, firstFailAt.getTime());
@@ -187,6 +226,7 @@ export async function recordLoginAttempt(
   const key = cacheKey(email, ipAddress);
 
   try {
+    await ensureTables();
     await prisma.loginAttempt.create({
       data: {
         email: email.toLowerCase(),
