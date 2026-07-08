@@ -219,7 +219,7 @@ function adicionarMetodoPreco(doc: jsPDF, dados: DadosRelatorioPesquisa, margin:
 
   doc.setFontSize(16);
   doc.setTextColor(27, 94, 32);
-  doc.text(`R$ ${formatarMoeda(dados.precoEstimado)}`, margin + 3, y + 40);
+  doc.text(formatarMoeda(dados.precoEstimado), margin + 3, y + 40);
 }
 
 function adicionarTabelaDetalhada(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
@@ -233,7 +233,7 @@ function adicionarTabelaDetalhada(doc: jsPDF, dados: DadosRelatorioPesquisa, mar
     item.orgao,
     item.uf,
     item.objeto.substring(0, 50) + '...',
-    `R$ ${formatarMoeda(item.valorTotal)}`,
+    formatarMoeda(item.valorTotal),
     formatarData(item.dataInicio),
   ]);
 
@@ -369,7 +369,7 @@ function adicionarRodape(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: numb
   doc.text('CONCLUSÃO', margin, y);
 
   doc.setFontSize(9);
-  const conclusao = `O valor estimado de R$ ${formatarMoeda(dados.precoEstimado)} reflete adequadamente o mercado praticado pela Administracao Publica para este objeto, conforme exigido pela Lei n 14.133/2021 e regulamentado pela IN SEGES/ME n 65/2021.`;
+  const conclusao = `O valor estimado de ${formatarMoeda(dados.precoEstimado)} reflete adequadamente o mercado praticado pela Administracao Publica para este objeto, conforme exigido pela Lei n 14.133/2021 e regulamentado pela IN SEGES/ME n 65/2021.`;
   doc.text(conclusao, margin, y + 10, { maxWidth: boxW });
 
   let footerY = y + 35;

@@ -101,7 +101,7 @@ export default function RelatorioExport({ selectedResults, termoBusca }: Relator
         desvioPadrao: stats.desvioPadrao,
         coeficienteVariacao: stats.coeficienteVariacao,
 
-        metodoCalculo,
+metodoCalculo,
         precoEstimado,
         margemAdicionada,
         justificativaMetodo,
