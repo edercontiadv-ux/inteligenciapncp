@@ -5,6 +5,7 @@ import { PNCPResult, gerarId } from '@/lib/pncp-api';
 import CardEstatisticas from './CardEstatisticas';
 import ResultadosEmLista from './ResultadosEmLista';
 import RelatorioWizard from './RelatorioWizard';
+import ErrorBoundary from './ErrorBoundary';
 import { FileDown } from 'lucide-react';
 
 interface PainelResultadosProps {
@@ -65,11 +66,13 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
       />
 
       {showWizard && (
-        <RelatorioWizard
-          selectedResults={selectedResults}
-          termoBusca={termoBusca}
-          onClose={() => setShowWizard(false)}
-        />
+        <ErrorBoundary>
+          <RelatorioWizard
+            selectedResults={selectedResults}
+            termoBusca={termoBusca}
+            onClose={() => setShowWizard(false)}
+          />
+        </ErrorBoundary>
       )}
     </div>
   );
