@@ -13,57 +13,51 @@ export async function gerarRelatorioPDF(
     format: 'a4',
   });
 
-  let yPosition = 20;
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 15;
   const contentWidth = pageWidth - 2 * margin;
 
-  const checkPageBreak = (needed: number) => {
-    if (yPosition + needed > pageHeight - margin) {
-      doc.addPage();
-      yPosition = margin;
-    }
-  };
+  let y = margin;
 
-  adicionarCabecalho(doc, dados, margin, yPosition);
-  yPosition = 75;
-
-  checkPageBreak(45);
-  adicionarMetodologia(doc, dados, margin, yPosition);
-  yPosition += 55;
-
-  checkPageBreak(65);
-  adicionarEstatisticas(doc, dados, margin, yPosition);
-  yPosition += 80;
-
-  checkPageBreak(35);
-  adicionarMetodoPreco(doc, dados, margin, yPosition);
-  yPosition += 45;
+  y = adicionarCabecalho(doc, dados, margin, y);
+  y = verificarQuebraPagina(doc, y, 45, margin, pageHeight);
+  y = adicionarMetodologia(doc, dados, margin, y);
+  y = verificarQuebraPagina(doc, y, 65, margin, pageHeight);
+  y = adicionarEstatisticas(doc, dados, margin, y);
+  y = verificarQuebraPagina(doc, y, 35, margin, pageHeight);
+  y = adicionarMetodoPreco(doc, dados, margin, y, pageWidth);
 
   doc.addPage();
-  yPosition = margin;
-  adicionarTabelaDetalhada(doc, dados, margin, yPosition);
+  y = margin;
+  y = adicionarTabelaDetalhada(doc, dados, margin, y, pageHeight);
 
   doc.addPage();
-  yPosition = margin;
-  adicionarDistribuicoes(doc, dados, margin, yPosition);
-  yPosition += 60;
-
-  checkPageBreak(50);
-  adicionarAnaliseCritica(doc, dados, margin, yPosition);
-  yPosition += 50;
-
-  checkPageBreak(50);
-  adicionarBaseLegal(doc, dados, margin, yPosition);
+  y = margin;
+  y = adicionarDistribuicoes(doc, dados, margin, y);
+  y = verificarQuebraPagina(doc, y, 50, margin, pageHeight);
+  y = adicionarAnaliseCritica(doc, dados, margin, y, pageWidth, pageHeight);
+  y = verificarQuebraPagina(doc, y, 50, margin, pageHeight);
+  y = adicionarBaseLegal(doc, dados, margin, y, pageWidth, pageHeight);
 
   doc.addPage();
-  adicionarRodape(doc, dados, margin);
+  y = margin;
+  adicionarRodape(doc, dados, margin, pageWidth);
 
   doc.save(nomeArquivo);
 }
 
-function adicionarCabecalho(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
+function verificarQuebraPagina(
+  doc: jsPDF, y: number, espacoNecessario: number, margin: number, pageHeight: number
+): number {
+  if (y + espacoNecessario > pageHeight - margin) {
+    doc.addPage();
+    return margin;
+  }
+  return y;
+}
+
+function adicionarCabecalho(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number): number {
   doc.setFontSize(16);
   doc.setTextColor(0, 51, 102);
   doc.text('RELATÓRIO DE PESQUISA DE PREÇOS', margin, y);
@@ -72,34 +66,38 @@ function adicionarCabecalho(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: n
   doc.setTextColor(102, 102, 102);
   doc.text('Lei n 14.133/2021 | IN SEGES/ME n 65/2021', margin, y + 8);
 
-  doc.setDrawColor(0, 51, 102);
   const boxW = doc.internal.pageSize.getWidth() - 2 * margin;
+  doc.setDrawColor(0, 51, 102);
   doc.setFillColor(245, 245, 245);
   doc.rect(margin, y + 15, boxW, 45, 'F');
 
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
   let infoY = y + 22;
+  const lineH = 5.5;
 
   doc.text(`Objeto da Pesquisa: ${dados.objetoPesquisa}`, margin + 5, infoY);
-  infoY += 6;
+  infoY += lineH;
   doc.text(`Termos de Busca: ${dados.termosBusca.join(', ')}`, margin + 5, infoY);
-  infoY += 6;
+  infoY += lineH;
   doc.text(`Data da Consulta: ${formatarData(dados.dataConsulta)} as ${dados.horaConsulta}`, margin + 5, infoY);
-  infoY += 6;
+  infoY += lineH;
   doc.text(`Periodo Pesquisado: ${formatarData(dados.periodoInicial)} a ${formatarData(dados.periodoFinal)}`, margin + 5, infoY);
-  infoY += 6;
+  infoY += lineH;
   doc.text(`Orgao Solicitante: ${dados.orgaoSolicitante || '(Nao informado)'}`, margin + 5, infoY);
-  infoY += 6;
+  infoY += lineH;
   doc.text(`Servidor Responsavel: ${dados.servidorResponsavel || '(Nao informado)'}`, margin + 5, infoY);
+
+  return y + 65;
 }
 
-function adicionarMetodologia(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
+function adicionarMetodologia(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number): number {
+  const boxW = doc.internal.pageSize.getWidth() - 2 * margin;
+
   doc.setFontSize(12);
   doc.setTextColor(0, 51, 102);
   doc.text('2. METODOLOGIA E FONTE DE DADOS', margin, y);
 
-  const boxW = doc.internal.pageSize.getWidth() - 2 * margin;
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
   let currentY = y + 10;
@@ -135,9 +133,11 @@ function adicionarMetodologia(doc: jsPDF, dados: DadosRelatorioPesquisa, margin:
     margin + 3,
     currentY + 4
   );
+
+  return currentY + 12;
 }
 
-function adicionarEstatisticas(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
+function adicionarEstatisticas(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number): number {
   doc.setFontSize(12);
   doc.setTextColor(0, 51, 102);
   doc.text('3. ESTATISTICAS DOS PRECOS ENCONTRADOS', margin, y);
@@ -160,8 +160,8 @@ function adicionarEstatisticas(doc: jsPDF, dados: DadosRelatorioPesquisa, margin
     headStyles: { fillColor: [245, 245, 245], textColor: [0, 0, 0], fontSize: 9 },
     bodyStyles: { fontSize: 9 },
     alternateRowStyles: { fillColor: [245, 245, 245] },
-    didDrawPage: () => {},
   });
+  let yApos = (doc as any).lastAutoTable.finalY + 5;
 
   const tabelaEstat = [
     ['Valor Minimo', formatarMoeda(dados.valorMinimo)],
@@ -173,7 +173,7 @@ function adicionarEstatisticas(doc: jsPDF, dados: DadosRelatorioPesquisa, margin
   ];
 
   autoTable(doc, {
-    startY: y + 38,
+    startY: yApos,
     head: [['Metrica', 'Valor']],
     body: tabelaEstat,
     margin: { left: margin, right: margin },
@@ -184,12 +184,14 @@ function adicionarEstatisticas(doc: jsPDF, dados: DadosRelatorioPesquisa, margin
     headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255], fontSize: 9 },
     bodyStyles: { fontSize: 9 },
     alternateRowStyles: { fillColor: [245, 245, 245] },
-    didDrawPage: () => {},
   });
+  yApos = (doc as any).lastAutoTable.finalY + 5;
+
+  return yApos;
 }
 
-function adicionarMetodoPreco(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
-  const boxW = doc.internal.pageSize.getWidth() - 2 * margin;
+function adicionarMetodoPreco(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number, pageWidth: number): number {
+  const boxW = pageWidth - 2 * margin;
 
   doc.setFontSize(12);
   doc.setTextColor(0, 51, 102);
@@ -205,7 +207,8 @@ function adicionarMetodoPreco(doc: jsPDF, dados: DadosRelatorioPesquisa, margin:
 
   const justificativaLines = doc.splitTextToSize(dados.justificativaMetodo, boxW - 6);
   doc.setFontSize(8);
-  for (let i = 0; i < justificativaLines.length && i < 2; i++) {
+  const maxLines = Math.min(justificativaLines.length, 2);
+  for (let i = 0; i < maxLines; i++) {
     doc.text(justificativaLines[i], margin + 3, y + 20 + i * 4);
   }
 
@@ -220,9 +223,11 @@ function adicionarMetodoPreco(doc: jsPDF, dados: DadosRelatorioPesquisa, margin:
   doc.setFontSize(16);
   doc.setTextColor(27, 94, 32);
   doc.text(formatarMoeda(dados.precoEstimado), margin + 3, y + 40);
+
+  return y + 47;
 }
 
-function adicionarTabelaDetalhada(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
+function adicionarTabelaDetalhada(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number, pageHeight: number): number {
   doc.setFontSize(12);
   doc.setTextColor(0, 51, 102);
   doc.text(`5. RELACAO DE CONTRATOS/ATAS UTILIZADOS (${dados.totalRegistros} registros)`, margin, y);
@@ -243,21 +248,24 @@ function adicionarTabelaDetalhada(doc: jsPDF, dados: DadosRelatorioPesquisa, mar
     body: tabelaBody,
     margin: { left: margin, right: margin },
     columnStyles: {
-      0: { cellWidth: 15 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 50 },
-      3: { cellWidth: 12, halign: 'center' },
-      4: { cellWidth: 50 },
-      5: { cellWidth: 25, halign: 'right' },
-      6: { cellWidth: 20, halign: 'center' },
+      0: { cellWidth: 14 },
+      1: { cellWidth: 18 },
+      2: { cellWidth: 52 },
+      3: { cellWidth: 10, halign: 'center' },
+      4: { cellWidth: 48 },
+      5: { cellWidth: 24, halign: 'right' },
+      6: { cellWidth: 18, halign: 'center' },
     },
-    headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255], fontSize: 8 },
-    bodyStyles: { fontSize: 8 },
+    headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255], fontSize: 7 },
+    bodyStyles: { fontSize: 7 },
     alternateRowStyles: { fillColor: [245, 245, 245] },
+    tableWidth: 'auto',
   });
+
+  return (doc as any).lastAutoTable.finalY + 5;
 }
 
-function adicionarDistribuicoes(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
+function adicionarDistribuicoes(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number): number {
   doc.setFontSize(12);
   doc.setTextColor(0, 51, 102);
   doc.text('6. DISTRIBUICAO DOS RESULTADOS', margin, y);
@@ -276,8 +284,8 @@ function adicionarDistribuicoes(doc: jsPDF, dados: DadosRelatorioPesquisa, margi
     margin: { left: margin, right: margin + 90 },
     headStyles: { fillColor: [245, 245, 245], fontSize: 8 },
     bodyStyles: { fontSize: 8 },
-    didDrawPage: () => {},
   });
+  const yTipo = (doc as any).lastAutoTable.finalY;
 
   doc.text('Por UF:', margin + 100, y + 12);
   const tabelaUF = Object.entries(dados.distribuicaoPorUF).map(([uf, quantidade]) => [
@@ -292,12 +300,17 @@ function adicionarDistribuicoes(doc: jsPDF, dados: DadosRelatorioPesquisa, margi
     margin: { left: margin + 100, right: margin },
     headStyles: { fillColor: [245, 245, 245], fontSize: 8 },
     bodyStyles: { fontSize: 8 },
-    didDrawPage: () => {},
   });
+  const yUF = (doc as any).lastAutoTable.finalY;
+
+  return Math.max(yTipo, yUF) + 5;
 }
 
-function adicionarAnaliseCritica(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
-  const boxW = doc.internal.pageSize.getWidth() - 2 * margin;
+function adicionarAnaliseCritica(
+  doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number,
+  pageWidth: number, pageHeight: number
+): number {
+  const boxW = pageWidth - 2 * margin;
 
   doc.setFontSize(12);
   doc.setTextColor(0, 51, 102);
@@ -308,27 +321,43 @@ function adicionarAnaliseCritica(doc: jsPDF, dados: DadosRelatorioPesquisa, marg
   const obsLines = doc.splitTextToSize(dados.observacoes, boxW);
   let obsY = y + 10;
   for (const line of obsLines) {
-    if (obsY > 270) break;
+    if (obsY > pageHeight - margin) {
+      doc.addPage();
+      obsY = margin;
+    }
     doc.text(line, margin, obsY);
     obsY += 4;
   }
 
-  let nextY = Math.max(obsY + 10, y + 50);
+  let nextY = Math.max(obsY + 8, y + 50);
+  if (nextY > pageHeight - margin) {
+    doc.addPage();
+    nextY = margin;
+  }
+
   doc.setFontSize(9);
   doc.text('Recomendacoes:', margin, nextY);
   nextY += 8;
 
   doc.setFontSize(8);
-  dados.recomendacoes.forEach((rec, index) => {
+  dados.recomendacoes.forEach((rec) => {
+    if (nextY > pageHeight - margin - 10) {
+      doc.addPage();
+      nextY = margin;
+    }
     const lines = doc.splitTextToSize(rec, boxW - 10);
-    doc.text(`${index + 1}.`, margin + 5, nextY);
-    doc.text(lines, margin + 15, nextY);
+    doc.text(lines, margin + 5, nextY);
     nextY += lines.length * 4 + 2;
   });
+
+  return nextY + 5;
 }
 
-function adicionarBaseLegal(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number) {
-  const boxW = doc.internal.pageSize.getWidth() - 2 * margin;
+function adicionarBaseLegal(
+  doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number,
+  pageWidth: number, pageHeight: number
+): number {
+  const boxW = pageWidth - 2 * margin;
 
   doc.setFontSize(12);
   doc.setTextColor(0, 51, 102);
@@ -345,6 +374,10 @@ function adicionarBaseLegal(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: n
     boxW - 10
   );
   for (const line of art23) {
+    if (currentY > pageHeight - margin) {
+      doc.addPage();
+      currentY = margin;
+    }
     doc.text(line, margin + 5, currentY);
     currentY += 4;
   }
@@ -358,11 +391,13 @@ function adicionarBaseLegal(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: n
   doc.text('Art. 6, IN SEGES/ME n 65/2021', margin, currentY);
   currentY += 5;
   doc.text(`Metodo: ${traduzirMetodo(dados.metodoCalculo)} com ${dados.totalRegistros} precos (minimo 3 exigido)`, margin + 5, currentY);
+
+  return currentY + 10;
 }
 
-function adicionarRodape(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number) {
-  const y = 30;
-  const boxW = doc.internal.pageSize.getWidth() - 2 * margin;
+function adicionarRodape(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, pageWidth: number) {
+  const boxW = pageWidth - 2 * margin;
+  const y = margin;
 
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
@@ -370,9 +405,15 @@ function adicionarRodape(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: numb
 
   doc.setFontSize(9);
   const conclusao = `O valor estimado de ${formatarMoeda(dados.precoEstimado)} reflete adequadamente o mercado praticado pela Administracao Publica para este objeto, conforme exigido pela Lei n 14.133/2021 e regulamentado pela IN SEGES/ME n 65/2021.`;
-  doc.text(conclusao, margin, y + 10, { maxWidth: boxW });
 
-  let footerY = y + 35;
+  const concLines = doc.splitTextToSize(conclusao, boxW);
+  let concY = y + 10;
+  for (const line of concLines) {
+    doc.text(line, margin, concY);
+    concY += 5;
+  }
+
+  let footerY = Math.max(concY + 10, y + 35);
   doc.setFontSize(8);
   doc.setTextColor(102, 102, 102);
 
