@@ -67,19 +67,30 @@ function adicionarCabecalho(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: n
   doc.text('Lei n 14.133/2021 | IN SEGES/ME n 65/2021', margin, y + 8);
 
   const boxW = doc.internal.pageSize.getWidth() - 2 * margin;
+
+  let infoY = y + 22;
+  const lineH = 5.5;
+  const textWidth = boxW - 10;
+
+  const objLines = doc.splitTextToSize(`Objeto da Pesquisa: ${dados.objetoPesquisa}`, textWidth);
+  const termLines = doc.splitTextToSize(`Termos de Busca: ${dados.termosBusca.join(', ')}`, textWidth);
+  const totalLines = objLines.length + termLines.length + 4;
+  const boxTop = y + 15;
+  const boxHeight = Math.max(45, 8 + totalLines * lineH);
   doc.setDrawColor(0, 51, 102);
   doc.setFillColor(245, 245, 245);
-  doc.rect(margin, y + 15, boxW, 45, 'F');
+  doc.rect(margin, boxTop, boxW, boxHeight, 'F');
 
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
-  let infoY = y + 22;
-  const lineH = 5.5;
-
-  doc.text(`Objeto da Pesquisa: ${dados.objetoPesquisa}`, margin + 5, infoY);
-  infoY += lineH;
-  doc.text(`Termos de Busca: ${dados.termosBusca.join(', ')}`, margin + 5, infoY);
-  infoY += lineH;
+  for (const line of objLines) {
+    doc.text(line, margin + 5, infoY);
+    infoY += lineH;
+  }
+  for (const line of termLines) {
+    doc.text(line, margin + 5, infoY);
+    infoY += lineH;
+  }
   doc.text(`Data da Consulta: ${formatarData(dados.dataConsulta)} as ${dados.horaConsulta}`, margin + 5, infoY);
   infoY += lineH;
   doc.text(`Periodo Pesquisado: ${formatarData(dados.periodoInicial)} a ${formatarData(dados.periodoFinal)}`, margin + 5, infoY);
@@ -88,7 +99,7 @@ function adicionarCabecalho(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: n
   infoY += lineH;
   doc.text(`Servidor Responsavel: ${dados.servidorResponsavel || '(Nao informado)'}`, margin + 5, infoY);
 
-  return y + 65;
+  return infoY + 5;
 }
 
 function adicionarMetodologia(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number): number {
@@ -240,26 +251,36 @@ function adicionarTabelaDetalhada(doc: jsPDF, dados: DadosRelatorioPesquisa, mar
     item.objeto.substring(0, 50) + '...',
     formatarMoeda(item.valorTotal),
     formatarData(item.dataInicio),
+    item.linkPDF,
   ]);
 
   autoTable(doc, {
     startY: y + 8,
-    head: [['Tipo', 'Numero', 'Orgao', 'UF', 'Objeto', 'Valor Total', 'Data Inicio']],
+    head: [['Tipo', 'Numero', 'Orgao', 'UF', 'Objeto', 'Valor Total', 'Data Inicio', 'Link']],
     body: tabelaBody,
     margin: { left: margin, right: margin },
     columnStyles: {
-      0: { cellWidth: 14 },
-      1: { cellWidth: 18 },
-      2: { cellWidth: 52 },
-      3: { cellWidth: 10, halign: 'center' },
-      4: { cellWidth: 48 },
-      5: { cellWidth: 24, halign: 'right' },
-      6: { cellWidth: 18, halign: 'center' },
+      0: { cellWidth: 13 },
+      1: { cellWidth: 16 },
+      2: { cellWidth: 46 },
+      3: { cellWidth: 9, halign: 'center' },
+      4: { cellWidth: 44 },
+      5: { cellWidth: 22, halign: 'right' },
+      6: { cellWidth: 16, halign: 'center' },
+      7: { cellWidth: 18, halign: 'center' },
     },
     headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255], fontSize: 7 },
     bodyStyles: { fontSize: 7 },
     alternateRowStyles: { fillColor: [245, 245, 245] },
     tableWidth: 'auto',
+    didDrawCell: (data: any) => {
+      if (data.section === 'body' && data.column.index === 7 && data.cell.raw) {
+        const link = data.cell.raw as string;
+        if (link) {
+          doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url: link });
+        }
+      }
+    },
   });
 
   return (doc as any).lastAutoTable.finalY + 5;
@@ -417,17 +438,11 @@ function adicionarRodape(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: numb
   doc.setFontSize(8);
   doc.setTextColor(102, 102, 102);
 
-  doc.text('Relatorio Gerado por: Inteligencia PNCP', margin, footerY);
-  footerY += 5;
   doc.text(`Data de Emissao: ${formatarData(new Date())} as ${new Date().toLocaleTimeString('pt-BR')}`, margin, footerY);
   footerY += 5;
   doc.text('Validade: 6 (seis) meses, conforme prazos da IN 65/2021', margin, footerY);
-  footerY += 15;
-
-  doc.setFontSize(7);
-  doc.text('Relatorio confidencial destinado ao uso interno da Administracao Publica', margin, footerY);
-  footerY += 15;
+  footerY += 20;
 
   doc.line(margin, footerY, margin + 80, footerY);
-  doc.text('Assinatura / Nome do Gestor', margin, footerY + 5);
+  doc.text('Assinatura', margin, footerY + 5);
 }
