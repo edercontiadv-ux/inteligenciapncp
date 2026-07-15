@@ -45,9 +45,12 @@ export function validarConformidadeLei(dados: DadosRelatorioPesquisa): Resultado
     );
   }
 
-  const valoresSemAnomalias = dados.listaResultados.every(r => {
-    return r.valorTotal > 0 && r.valorTotal < Number.MAX_SAFE_INTEGER;
-  });
+  const valoresSemAnomalias = dados.listaResultados
+    .filter(r => typeof r.valorTotal === 'number' || typeof r.valorTotal === 'string')
+    .every(r => {
+      const v = Number(r.valorTotal);
+      return !isNaN(v) && isFinite(v) && v > 0 && v < Number.MAX_SAFE_INTEGER;
+    });
   if (!valoresSemAnomalias) {
     resultado.erros.push(
       'ERRO: Há valores inconsistentes na amostra (zero ou infinito)'

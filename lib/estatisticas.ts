@@ -29,10 +29,11 @@ function calcularModa(valores: number[]): number | undefined {
 }
 
 export function calcularEstatisticas(items: PNCPResult[]): Estatisticas {
-  const comValor = items.filter(
-    (item) => item.valorInicial !== undefined && item.valorInicial !== null && item.valorInicial > 0
-  );
-  const valoresBrutos = comValor.map((item) => item.valorInicial!).sort((a, b) => a - b);
+  const comValor = items.filter((item) => {
+    const v = Number(item.valorInicial);
+    return !isNaN(v) && isFinite(v) && v > 0;
+  });
+  const valoresBrutos = comValor.map((item) => Number(item.valorInicial)).sort((a, b) => a - b);
 
   if (valoresBrutos.length === 0) {
     return {

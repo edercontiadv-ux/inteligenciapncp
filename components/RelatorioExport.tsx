@@ -25,10 +25,14 @@ export default function RelatorioExport({ selectedResults, termoBusca }: Relator
     setError(null);
 
     try {
-      const values = selectedResults.map(r => r.valorInicial || 0).filter(v => v > 0);
-      const stats = calcularEstatisticas(selectedResults);
+      const comValor = selectedResults.filter(r => {
+        const v = Number(r.valorInicial);
+        return !isNaN(v) && isFinite(v) && v > 0;
+      });
+      const values = comValor.map(r => Number(r.valorInicial));
+      const stats = calcularEstatisticas(comValor);
 
-      const listaResultados: ResultadoItem[] = selectedResults.map((item, index) => ({
+      const listaResultados: ResultadoItem[] = comValor.map((item, index) => ({
         id: `r-${index}`,
         tipo: item.tipo,
         numero: item.tipo === 'CONTRATO'
@@ -38,7 +42,7 @@ export default function RelatorioExport({ selectedResults, termoBusca }: Relator
         orgao: item.orgaoEntidade?.razaoSocial || item.unidadeOrgao?.nomeUnidade || '',
         uf: item.unidadeOrgao?.ufSigla || '',
         objeto: item.objetoContrato || item.objetoAta || '',
-        valorTotal: item.valorInicial || 0,
+        valorTotal: Number(item.valorInicial),
         dataInicio: item.dataVigenciaInicio,
         linkPDF: item.linkArquivo,
         fonte: 'PNCP',
