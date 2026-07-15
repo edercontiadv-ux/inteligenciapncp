@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { PNCPResult, gerarId } from '@/lib/pncp-api';
 import CardEstatisticas from './CardEstatisticas';
 import ResultadosEmLista from './ResultadosEmLista';
-import RelatorioExport from './RelatorioExport';
+import RelatorioWizard from './RelatorioWizard';
 import { FileDown } from 'lucide-react';
 
 interface PainelResultadosProps {
@@ -14,6 +14,7 @@ interface PainelResultadosProps {
 
 export default function PainelResultados({ results, termoBusca }: PainelResultadosProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showWizard, setShowWizard] = useState(false);
 
   const handleSelect = (id: string) => {
     setSelectedIds(prev =>
@@ -42,10 +43,15 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
             <span className="text-xs text-brand-navy/60">
               {selectedIds.length} de {results.length} selecionado{selectedIds.length !== 1 ? 's' : ''}
             </span>
-            <RelatorioExport
-              selectedResults={selectedResults}
-              termoBusca={termoBusca}
-            />
+            <button
+              onClick={() => setShowWizard(true)}
+              disabled={selectedResults.length < 3}
+              className="btn-primary text-xs px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={selectedResults.length < 3 ? 'Selecione pelo menos 3 itens' : ''}
+            >
+              <FileDown className="mr-1.5 h-4 w-4" />
+              Gerar Relatório ({selectedIds.length})
+            </button>
           </div>
         )}
       </div>
@@ -57,6 +63,14 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
         onSelect={handleSelect}
         onSelectAll={handleSelectAll}
       />
+
+      {showWizard && (
+        <RelatorioWizard
+          selectedResults={selectedResults}
+          termoBusca={termoBusca}
+          onClose={() => setShowWizard(false)}
+        />
+      )}
     </div>
   );
 }
