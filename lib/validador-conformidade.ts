@@ -100,25 +100,17 @@ export function gerarObservacoes(
 ): string {
   const linhas: string[] = [];
 
-  linhas.push(`ANÁLISE CRÍTICA DOS PREÇOS COLETADOS`);
-  linhas.push(``);
   linhas.push(`Foram analisados ${resultados.length} registros de contratações similares obtidos do PNCP.`);
-  linhas.push(``);
 
-  if (stats.coeficienteVariacao < 0.15) {
-    linhas.push(`Os preços apresentam alta homogeneidade (CV = ${(stats.coeficienteVariacao * 100).toFixed(1)}%), indicando mercado consolidado e previsível. A média aritmética é representativa.`);
-  } else if (stats.coeficienteVariacao < 0.30) {
-    linhas.push(`Os preços apresentam dispersão moderada (CV = ${(stats.coeficienteVariacao * 100).toFixed(1)}%), dentro do esperado para contratações públicas. A mediana foi adotada para mitigar efeitos de valores atípicos.`);
-  } else if (stats.coeficienteVariacao < 0.50) {
-    linhas.push(`Os preços apresentam dispersão significativa (CV = ${(stats.coeficienteVariacao * 100).toFixed(1)}%), sugerindo heterogeneidade no mercado. A mediana foi priorizada como medida de tendência central robusta.`);
-  } else {
-    linhas.push(`Os preços apresentam dispersão muito elevada (CV = ${(stats.coeficienteVariacao * 100).toFixed(1)}%), indicando mercado com baixa padronização. Recomenda-se adoção do menor valor ou segmentação da amostra.`);
+  const ufs = new Set(resultados.map(r => r.uf).filter(Boolean));
+  if (ufs.size > 1) {
+    linhas.push(`A amostra contempla ${ufs.size} estados diferentes, garantindo representatividade geográfica.`);
+  } else if (ufs.size === 1) {
+    linhas.push(`A amostra contempla apenas contratacoes do estado ${[...ufs][0]}.`);
   }
 
-  linhas.push(``);
-  linhas.push(`AMPLITUDE: Os valores variam entre ${formatarMoeda(stats.minimo)} e ${formatarMoeda(stats.maximo)}, com diferença de ${formatarMoeda(stats.maximo - stats.minimo)}.`);
-  linhas.push(``);
-  linhas.push(`CONCLUSÃO: O preço estimado reflete adequadamente as condições de mercado praticadas pela Administração Pública, em conformidade com o Art. 23 da Lei nº 14.133/2021 e a IN SEGES/ME nº 65/2021.`);
+  const regioes = resultados.length > 10 ? `${resultados.length} registros` : `${resultados.length} registro${resultados.length !== 1 ? 's' : ''}`;
+  linhas.push(`Um total de ${regioes} foram utilizados para a formacao do preco de referencia, conforme metodologia detalhada nas secoes anteriores.`);
 
   return linhas.join('\n');
 }
