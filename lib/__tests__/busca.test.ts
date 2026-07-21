@@ -83,10 +83,16 @@ describe('scoringRelevancia', () => {
     expect(result[0].objetoContrato).toContain('Cadeira');
   });
 
-  it('should return at least 30 results when few match', () => {
-    const items = Array.from({ length: 35 }, (_, i) => makeItem(`Item ${i}`));
-    const result = scoringRelevancia(items, ['mesa']);
-    expect(result.length).toBe(30);
+  it('should never return items with score 0 (no relevance)', () => {
+    const items = [
+      ...Array.from({ length: 5 }, (_, i) => makeItem('Geladeira para vacinas')),
+      ...Array.from({ length: 35 }, (_, i) => makeItem(`Item irrelevante ${i}`)),
+    ];
+    const result = scoringRelevancia(items, ['geladeira', 'vacina']);
+    expect(result.length).toBe(5);
+    result.forEach(r => {
+      expect(r.objetoContrato).toContain('Geladeira');
+    });
   });
 
   it('should return all matching items when >= 30 match and IDF > 0', () => {

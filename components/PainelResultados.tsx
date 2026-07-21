@@ -6,7 +6,7 @@ import CardEstatisticas from './CardEstatisticas';
 import ResultadosEmLista from './ResultadosEmLista';
 import RelatorioWizard from './RelatorioWizard';
 import ErrorBoundary from './ErrorBoundary';
-import { FileDown } from 'lucide-react';
+import { FileDown, AlertTriangle } from 'lucide-react';
 
 interface PainelResultadosProps {
   results: PNCPResult[];
@@ -31,9 +31,33 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
     return results.filter((item, index) => selectedIds.includes(gerarId(item, index)));
   }, [results, selectedIds]);
 
+  const comValor = useMemo(() =>
+    results.filter(r => {
+      const v = Number(r.valorInicial);
+      return !isNaN(v) && isFinite(v) && v > 0;
+    }).length,
+    [results]
+  );
+
   return (
     <div className="space-y-6">
       <CardEstatisticas results={results} />
+
+      {results.length > 0 && comValor > 0 && comValor < 3 && (
+        <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+            <div className="text-sm text-yellow-800">
+              <p className="font-semibold mb-1">Amostra insuficiente conforme Art. 6º, IN 65/2021</p>
+              <p>
+                Apenas <strong>{comValor} {comValor === 1 ? 'preço foi' : 'preços foram'} encontrado{comValor === 1 ? '' : 's'}</strong> com valor válido. 
+                O cálculo estatístico exige o <strong>mínimo de 3 preços</strong> para conformidade legal. 
+                Considere ampliar o período de busca ou usar parâmetros adicionais para aumentar a amostra.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between">
         <div className="text-xs text-brand-navy/50">
@@ -46,9 +70,7 @@ export default function PainelResultados({ results, termoBusca }: PainelResultad
             </span>
             <button
               onClick={() => setShowWizard(true)}
-              disabled={selectedResults.length < 3}
               className="btn-primary text-xs px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={selectedResults.length < 3 ? 'Selecione pelo menos 3 itens' : ''}
             >
               <FileDown className="mr-1.5 h-4 w-4" />
               Gerar Relatório ({selectedIds.length})

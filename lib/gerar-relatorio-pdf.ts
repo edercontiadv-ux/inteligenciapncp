@@ -28,13 +28,13 @@ export async function gerarRelatorioPDF(
   let y = margin;
 
   y = adicionarSecao1Cabecalho(doc, dados, margin, y, pageWidth);
-  y = verificarQP(doc, y, 40, margin, pageHeight);
+  y = verificarQP(doc, y, estimarSecao2Metodologia(doc, dados, pageWidth), margin, pageHeight);
   y = adicionarSecao2Metodologia(doc, dados, margin, y, pageWidth);
-  y = verificarQP(doc, y, 60, margin, pageHeight);
+  y = verificarQP(doc, y, estimarSecao3Estatisticas(dados), margin, pageHeight);
   y = adicionarSecao3Estatisticas(doc, dados, margin, y, pageWidth);
-  y = verificarQP(doc, y, 35, margin, pageHeight);
+  y = verificarQP(doc, y, estimarSecao4Desconsideracao(), margin, pageHeight);
   y = adicionarSecao4Desconsideracao(doc, dados, margin, y, pageWidth);
-  y = verificarQP(doc, y, 30, margin, pageHeight);
+  y = verificarQP(doc, y, estimarSecao5MetodoPreco(doc, dados, pageWidth), margin, pageHeight);
   y = adicionarSecao5MetodoPreco(doc, dados, margin, y, pageWidth);
 
   doc.addPage(); y = margin;
@@ -42,11 +42,11 @@ export async function gerarRelatorioPDF(
 
   doc.addPage(); y = margin;
   y = adicionarSecao7Distribuicao(doc, dados, margin, y);
-  y = verificarQP(doc, y, 40, margin, pageHeight);
+  y = verificarQP(doc, y, estimarSecao8AnaliseCritica(doc, dados, pageWidth), margin, pageHeight);
   y = adicionarSecao8AnaliseCritica(doc, dados, margin, y, pageWidth, pageHeight);
-  y = verificarQP(doc, y, 30, margin, pageHeight);
+  y = verificarQP(doc, y, estimarSecao9Recomendacoes(doc, dados, pageWidth), margin, pageHeight);
   y = adicionarSecao9Recomendacoes(doc, dados, margin, y, pageWidth, pageHeight);
-  y = verificarQP(doc, y, 30, margin, pageHeight);
+  y = verificarQP(doc, y, estimarSecao10BaseLegal(doc, dados, pageWidth), margin, pageHeight);
   y = adicionarSecao10BaseLegal(doc, dados, margin, y, pageWidth, pageHeight);
 
   doc.addPage(); y = margin;
@@ -61,6 +61,69 @@ function verificarQP(doc: jsPDF, y: number, espaco: number, margin: number, page
     return margin;
   }
   return y;
+}
+
+function estimarSecao2Metodologia(doc: jsPDF, dados: DadosRelatorioPesquisa, pageWidth: number): number {
+  // Titulo (10mm) + "Parametro..." (6mm) + valor destacado (10mm) + 4 linhas fonte (6+5+5+10=26mm) + justificativa box (14mm)
+  let h = 66;
+  if (dados.coeficienteVariacao > 0.5) h += 20;
+  return h;
+}
+
+function estimarSecao3Estatisticas(dados: DadosRelatorioPesquisa): number {
+  // Titulo (8mm) + tabela registro (15mm) + gap (5mm) + tabela metricas (24mm) + pad (2mm)
+  let h = 54;
+  if (dados.coeficienteVariacao > 0.5) h += 14;
+  return h;
+}
+
+function estimarSecao4Desconsideracao(): number {
+  // Titulo (10mm) + 2 linhas texto (6+8=14mm) + box verde (12mm) + pad (2mm)
+  return 38;
+}
+
+function estimarSecao5MetodoPreco(doc: jsPDF, dados: DadosRelatorioPesquisa, pageWidth: number): number {
+  const boxW = pageWidth - 30;
+  const justLines = doc.splitTextToSize(dados.justificativaMetodo, boxW - 6);
+  const boxMetodoHeight = Math.max(22, 16 + justLines.length * 4 + 4);
+  // Titulo (10mm) + boxMetodo start (10mm) + boxMetodoHeight + gap (3mm) + precoBox (20mm) + pad (2mm)
+  return 10 + 10 + boxMetodoHeight + 3 + 20 + 2;
+}
+
+function estimarSecao7Distribuicao(): number {
+  // Titulo (12mm) + label (16mm startY) + 2 tabelas lado a lado (~22mm)
+  return 50;
+}
+
+function estimarSecao8AnaliseCritica(doc: jsPDF, dados: DadosRelatorioPesquisa, pageWidth: number): number {
+  const boxW = pageWidth - 30;
+  const obsLines = doc.splitTextToSize(dados.observacoes, boxW);
+  // Titulo (10mm) + amplitude (10mm) + dispersao (8mm) + gap (8mm) + observacoes + pad (5mm)
+  let h = 10 + 10 + 8 + 8 + obsLines.length * 4 + 5;
+  if (dados.precoEstimado > dados.valorMaximo * 1.2) h += 10;
+  return h;
+}
+
+function estimarSecao9Recomendacoes(doc: jsPDF, dados: DadosRelatorioPesquisa, pageWidth: number): number {
+  const boxW = pageWidth - 30;
+  const recs = gerarRecomendacoesCompletas(dados);
+  // Titulo (10mm) + gap (10mm) + cada recomendacao
+  let h = 20;
+  for (const rec of recs) {
+    const lines = doc.splitTextToSize(`- ${rec}`, boxW);
+    h += lines.length * 4 + 3;
+  }
+  return h + 3;
+}
+
+function estimarSecao10BaseLegal(doc: jsPDF, dados: DadosRelatorioPesquisa, pageWidth: number): number {
+  const boxW = pageWidth - 30;
+  const art23 = doc.splitTextToSize(
+    '"O valor previamente estimado da contratação deverá ser compatível com os valores praticados pelo mercado, considerados os preços constantes de bancos de dados públicos e as quantidades a serem contratadas, observadas a potencial economia de escala e as peculiaridades do local de execução do objeto."',
+    boxW - 8
+  );
+  // Titulo (10mm) + Art.23 (5 + art23.length*4 + 4 gap) + Art.5 (5+7) + Art.6 (5+7) + Acordao (5+8) + pad (8mm)
+  return 10 + 5 + art23.length * 4 + 4 + 5 + 7 + 5 + 7 + 5 + 8 + 8;
 }
 
 function textoDestaque(doc: jsPDF, texto: string, x: number, y: number, cor: [number, number, number], tamanho: number = FONTE_NORMAL) {
@@ -100,7 +163,8 @@ function adicionarSecao1Cabecalho(doc: jsPDF, dados: DadosRelatorioPesquisa, mar
 
   let linhasPrevistas = 0;
   for (const c of campos) {
-    linhasPrevistas += Math.ceil((`${c.rotulo}: ${c.valor}`.length * 1.8) / tw) || 1;
+    const textLines = doc.splitTextToSize(`${c.rotulo}: ${c.valor}`, tw);
+    linhasPrevistas += textLines.length;
   }
   const boxAltura = Math.max(50, 10 + linhasPrevistas * lh);
   const boxTop = y + 14;
@@ -152,7 +216,7 @@ function adicionarSecao2Metodologia(doc: jsPDF, dados: DadosRelatorioPesquisa, m
     doc.rect(margin, cy, boxW, 16, 'F');
     doc.setFontSize(FONTE_PEQUENA);
     doc.setTextColor(COR_AVISO[0], COR_AVISO[1], COR_AVISO[2]);
-    doc.text('⚠ AVISO LEGAL', margin + 3, cy + 4);
+    doc.text('[AVISO] AVISO LEGAL', margin + 3, cy + 4);
     doc.setTextColor(0, 0, 0);
     doc.text('Você está usando apenas 1 parâmetro. A jurisprudência do TCU (Acórdão 3059/2020)', margin + 3, cy + 9);
     doc.text('recomenda "cesta de preços" (múltiplas fontes) para maior robustez.', margin + 3, cy + 13);
@@ -183,8 +247,8 @@ function adicionarSecao3Estatisticas(doc: jsPDF, dados: DadosRelatorioPesquisa, 
   let ya = (doc as any).lastAutoTable.finalY + 5;
 
   const cv = dados.coeficienteVariacao;
-  const alertaCV = cv > 1 ? '🔴 Altíssima dispersão. Verifique se os valores são efetivamente comparáveis.'
-    : cv > 0.5 ? '⚠ Alta dispersão de preços. Recomenda-se desconsideração de outliers ou segmentação.'
+  const alertaCV = cv > 1 ? 'Altíssima dispersão. Verifique se os valores são efetivamente comparáveis.'
+    : cv > 0.5 ? 'Alta dispersão de preços. Recomenda-se desconsideração de outliers ou segmentação.'
     : null;
 
   autoTable(doc, {
@@ -236,7 +300,7 @@ function adicionarSecao4Desconsideracao(doc: jsPDF, dados: DadosRelatorioPesquis
   doc.rect(margin, cy, boxW, 12, 'F');
   doc.setFontSize(FONTE_PEQUENA);
   doc.setTextColor(COR_SUCESSO[0], COR_SUCESSO[1], COR_SUCESSO[2]);
-  doc.text('✓ Nenhum outlier identificado ou todos os valores foram considerados consistentes com o objeto.', margin + 3, cy + 5);
+  doc.text('[OK] Nenhum outlier identificado ou todos os valores foram considerados consistentes com o objeto.', margin + 3, cy + 5);
   cy += 16;
 
   return cy + 2;
@@ -250,41 +314,41 @@ function adicionarSecao5MetodoPreco(doc: jsPDF, dados: DadosRelatorioPesquisa, m
   const metodo = traduzirMetodo(dados.metodoCalculo);
   const cv = dados.coeficienteVariacao;
 
+  const justLines = doc.splitTextToSize(dados.justificativaMetodo, boxW - 6);
+  const justHeight = justLines.length * 4 + 4;
+  const boxMetodoHeight = Math.max(22, 16 + justHeight);
+
   doc.setDrawColor(255, 152, 0);
   doc.setFillColor(255, 243, 205);
-  doc.rect(margin, y + 10, boxW, 22, 'F');
+  doc.rect(margin, y + 10, boxW, boxMetodoHeight, 'F');
 
   doc.setFontSize(FONTE_NORMAL);
   doc.setTextColor(0, 0, 0);
   doc.text(`Método Adotado: ${metodo}`, margin + 3, y + 16);
 
-  const justLines = doc.splitTextToSize(dados.justificativaMetodo, boxW - 6);
   doc.setFontSize(FONTE_PEQUENA);
-  const maxJ = Math.min(justLines.length, 2);
-  for (let i = 0; i < maxJ; i++) {
+  for (let i = 0; i < justLines.length; i++) {
     doc.text(justLines[i], margin + 3, y + 23 + i * 4);
   }
-  if (justLines.length > 2) {
-    doc.text('...', margin + 3, y + 23 + 2 * 4);
-  }
 
+  const precoBoxTop = y + 10 + boxMetodoHeight + 3;
   doc.setDrawColor(76, 175, 80);
   doc.setFillColor(232, 245, 233);
-  doc.rect(margin, y + 35, boxW, 20, 'F');
+  doc.rect(margin, precoBoxTop, boxW, 20, 'F');
 
   doc.setFontSize(FONTE_SUBTITULO);
   doc.setTextColor(COR_SUCESSO[0], COR_SUCESSO[1], COR_SUCESSO[2]);
-  doc.text('PREÇO ESTIMADO PARA CONTRATAÇÃO:', margin + 3, y + 41);
+  doc.text('PRECO ESTIMADO PARA CONTRATACAO:', margin + 3, precoBoxTop + 6);
 
   doc.setFontSize(FONTE_DESTAQUE);
-  doc.text(formatarMoeda(dados.precoEstimado), margin + 3, y + 51);
+  doc.text(formatarMoeda(dados.precoEstimado), margin + 3, precoBoxTop + 16);
 
-  return y + 60;
+  return precoBoxTop + 22;
 }
 
 // ─── SEÇÃO 6: TABELA DETALHADA ───
 function adicionarSecao6Tabela(doc: jsPDF, dados: DadosRelatorioPesquisa, margin: number, y: number, pageHeight: number): number {
-  tituloSecao(doc, `6. RELAÇÃO DE CONTRATOS/ATAS UTILIZADOS (${dados.totalRegistros} registros)`, margin, y);
+  tituloSecao(doc, `6. RELAÇÃO DE CONTRATOS/ATAS UTILIZADOS (${dados.listaResultados.length} registros)`, margin, y);
 
   const tabelaBody = dados.listaResultados.map(item => [
     item.tipo,
@@ -414,7 +478,7 @@ function adicionarSecao9Recomendacoes(
   const recs = gerarRecomendacoesCompletas(dados);
   for (const rec of recs) {
     if (cy > pageHeight - margin - 10) { doc.addPage(); cy = margin; }
-    const lines = doc.splitTextToSize(`☑ ${rec}`, boxW);
+    const lines = doc.splitTextToSize(`- ${rec}`, boxW);
     doc.text(lines, margin, cy);
     cy += lines.length * 4 + 3;
   }
@@ -447,6 +511,8 @@ function adicionarSecao10BaseLegal(
 
   doc.setFontSize(FONTE_NORMAL);
   doc.setTextColor(0, 0, 0);
+
+  if (cy > pageHeight - margin - 15) { doc.addPage(); cy = margin; }
   doc.text('Art. 23, Lei nº 14.133/2021', margin, cy); cy += 5;
   const art23 = doc.splitTextToSize(
     '"O valor previamente estimado da contratação deverá ser compatível com os valores praticados pelo mercado, considerados os preços constantes de bancos de dados públicos e as quantidades a serem contratadas, observadas a potencial economia de escala e as peculiaridades do local de execução do objeto."',
@@ -459,20 +525,26 @@ function adicionarSecao10BaseLegal(
     cy += 4;
   }
   cy += 4;
+
+  if (cy > pageHeight - margin - 15) { doc.addPage(); cy = margin; }
   doc.setFontSize(FONTE_NORMAL);
   doc.text('Art. 5º, IN SEGES/ME nº 65/2021', margin, cy); cy += 5;
   doc.setFontSize(FONTE_PEQUENA);
-  doc.text('Parâmetros para pesquisa de preços: Contratações similares da Administração Pública', margin + 4, cy);
+  doc.text('Parametros para pesquisa de precos: Contratacoes similares da Administracao Publica', margin + 4, cy);
   cy += 7;
+
+  if (cy > pageHeight - margin - 15) { doc.addPage(); cy = margin; }
   doc.setFontSize(FONTE_NORMAL);
   doc.text('Art. 6º, IN SEGES/ME nº 65/2021', margin, cy); cy += 5;
   doc.setFontSize(FONTE_PEQUENA);
-  doc.text(`Método: ${traduzirMetodo(dados.metodoCalculo)} com ${dados.totalRegistros} preços analisados (mínimo 3 exigido)`, margin + 4, cy);
+  doc.text(`Metodo: ${traduzirMetodo(dados.metodoCalculo)} com ${dados.listaResultados.length} precos analisados (minimo 3 exigido)`, margin + 4, cy);
   cy += 7;
+
+  if (cy > pageHeight - margin - 15) { doc.addPage(); cy = margin; }
   doc.setFontSize(FONTE_NORMAL);
-  doc.text('Acórdão TCU nº 3059/2020', margin, cy); cy += 5;
+  doc.text('Acordao TCU nº 3059/2020', margin, cy); cy += 5;
   doc.setFontSize(FONTE_PEQUENA);
-  doc.text('Recomendação de "cesta de preços" com múltiplas fontes para maior robustez da estimativa.', margin + 4, cy);
+  doc.text('Recomendacao de "cesta de precos" com multiplas fontes para maior robustez da estimativa.', margin + 4, cy);
   return cy + 8;
 }
 

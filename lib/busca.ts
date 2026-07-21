@@ -34,7 +34,8 @@ export function getTextoObjeto(item: PNCPResult): string {
 export function palavraCorresponde(texto: string, palavra: string): boolean {
   if (texto.includes(palavra)) return true;
   if (palavra.length > 5) {
-    const stem = palavra.slice(0, 6);
+    const stemLength = Math.ceil(palavra.length * 0.8);
+    const stem = palavra.slice(0, stemLength);
     return texto.split(/\s+/).some(w => w.startsWith(stem));
   }
   return false;
@@ -67,12 +68,6 @@ export function scoringRelevancia(resultados: PNCPResult[], palavrasChave: strin
 
   scored.sort((a, b) => b.score - a.score);
 
-  const MIN_RESULTADOS = Math.min(30, resultados.length);
   const comMatch = scored.filter(r => r.score > 0);
-
-  if (comMatch.length >= MIN_RESULTADOS) {
-    return comMatch.map(r => r.item);
-  }
-
-  return scored.slice(0, MIN_RESULTADOS).map(r => r.item);
+  return comMatch.map(r => r.item);
 }

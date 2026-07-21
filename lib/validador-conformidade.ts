@@ -16,10 +16,9 @@ export function validarConformidadeLei(dados: DadosRelatorioPesquisa): Resultado
     informacoes: [],
   };
 
-  if (dados.totalRegistros < 3) {
-    resultado.conforme = false;
-    resultado.erros.push(
-      `ERRO CRÍTICO: Art. 6º, IN 65/2021 exige mínimo de 3 preços. Você tem ${dados.totalRegistros}. Não é possível gerar relatório.`
+  if (dados.registrosComValor < 3) {
+    resultado.avisos.push(
+      `AVISO: Amostra insuficiente (Art. 6º, IN 65/2021). O cálculo exige mínimo de 3 preços válidos, mas a pesquisa encontrou apenas ${dados.registrosComValor}. Justifique no processo administrativo.`
     );
   }
 
